@@ -1,0 +1,6 @@
+# Start a local Solr server (you need Java):
+$ rake sunspot:solr:start
+
+
+# Reindex Solr:
+$ rake sunspot:reindex
