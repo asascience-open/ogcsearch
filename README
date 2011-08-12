@@ -16,3 +16,6 @@ $ heroku config --app ogc-staging | grep MONGOLAB_URI
   
 $ 
 
+
+http://localhost:3000/wms/parse.json?url=http%3A%2F%2Ftds.maracoos.org%2FncWMS%2Fwms%3FSERVICE%3DWMS%26REQUEST%3DGetCapabilities%26VERSION%3D1.1.1
+http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities

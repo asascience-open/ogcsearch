@@ -12,6 +12,10 @@ Ogcsearch::Application.routes.draw do
 
   # Sample resource route (maps HTTP verbs to controller actions automatically):
   #   resources :products
+  
+  match 'wms/find.:format' => 'wms#find'
+  match 'wms/parse' => 'wms#parse'
+  match 'wms/status.:format' => 'wms#status'
 
   # Sample resource route with options:
   #   resources :products do
