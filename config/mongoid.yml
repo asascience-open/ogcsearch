@@ -6,15 +6,8 @@ test:
   host: localhost
   database: ogcsearch_test
 
-# set these environment variables on your prod server
+staging:
+  uri: mongodb://heroku_app736601:qjf170a5afe67ccjb85gq2u5n6@dbh29.mongolab.com:27297/heroku_app736601
+
 production:
-  host: <%= ENV['MONGOID_HOST'] %>
-  port: <%= ENV['MONGOID_PORT'] %>
-  username: <%= ENV['MONGOID_USERNAME'] %>
-  password: <%= ENV['MONGOID_PASSWORD'] %>
-  database: <%= ENV['MONGOID_DATABASE'] %>
-  # slaves:
-  #   - host: slave1.local
-  #     port: 27018
-  #   - host: slave2.local
-  #     port: 27019
+  uri: mongodb://heroku_app736604:mgeoqql9v827lan0cqm4bsu400@dbh30.mongolab.com:27307/heroku_app736604

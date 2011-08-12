@@ -4,3 +4,15 @@ $ rake sunspot:solr:start
 
 # Reindex Solr:
 $ rake sunspot:reindex
+
+# Setup in Heroku
+$ heroku create ogc-staging --stack cedar --remote ogc-staging
+$ heroku addons:add mongolab:starter --app ogc-staging
+$ heroku config --app ogc-staging | grep MONGOLAB_URI
+    MONGOLAB_URI => mongodb://heroku_app736601:qjf170a5afe67ccjb85gq2u5n6@dbh29.mongolab.com:27297/heroku_app736601
+    # Paste the result (above) so:
+    production:
+      uri: mongodb://heroku_app736601:qjf170a5afe67ccjb85gq2u5n6@dbh29.mongolab.com:27297/heroku_app736601
+  
+$ 
+
