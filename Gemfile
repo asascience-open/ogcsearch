@@ -18,3 +18,6 @@ gem 'sunspot_rails'
 gem 'sunspot_mongoid'
 
 gem 'heroku'
+
+# Caching
+gem 'dalli'
