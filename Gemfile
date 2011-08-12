@@ -17,6 +17,9 @@ gem 'nokogiri'
 gem 'sunspot_rails'
 gem 'sunspot_mongoid'
 
+# Webserver
+gem 'thin'
+
 gem 'heroku'
 
 # Caching
