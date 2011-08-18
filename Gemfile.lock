@@ -99,6 +99,7 @@ GEM
     rdoc (3.9.1)
     rest-client (1.6.3)
       mime-types (>= 1.16)
+    rgeo (0.3.2)
     rsolr (0.12.1)
       builder (>= 2.1.2)
     sunspot (1.2.1)
@@ -138,6 +139,7 @@ DEPENDENCIES
   mongoid_spacial (= 0.2.12)
   nokogiri
   rails (= 3.0.9)
+  rgeo
   sunspot_mongoid
   sunspot_rails
   thin

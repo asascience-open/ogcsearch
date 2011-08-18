@@ -26,12 +26,6 @@ class WmsServer
   
   # Locked by a job providing status updates
   field :status,          type: String
-  
-  # Spatial BBOX as two points
-  field :ll,              type: Array,        spacial: true
-  field :ur,              type: Array,        spacial: true  
-  spacial_index :ll
-  spacial_index :ur
 
   # Voting
   voteable self, :voting_field => :likes, :up => +1, :down => -1

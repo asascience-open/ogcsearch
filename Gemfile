@@ -30,3 +30,4 @@ gem 'dalli'
 
 # Application
 gem 'nokogiri'
+gem 'rgeo' # Requires the 'proj-devel' and 'geos-devel' packages

@@ -1,7 +1,6 @@
 # Start a local Solr server (you need Java):
 $ rake sunspot:solr:start
 
-
 # Reindex Solr:
 $ rake sunspot:reindex
 
@@ -29,6 +28,17 @@ $ rake mongo:voteable:reset_stats[WmsLayer]
 $ rake mongo:voteable:reset_stats[WmsStyle]
 
 
+# Sample parsing
+doc = Nokogiri::XML(open("http://asascience.mine.nu:8080/geoserver/ows?service=wms&version=1.1.1&request=GetCapabilities"))
 
+# Parse URL tests
 http://localhost:3000/wms/parse.json?url=http%3A%2F%2Ftds.maracoos.org%2FncWMS%2Fwms%3FSERVICE%3DWMS%26REQUEST%3DGetCapabilities%26VERSION%3D1.1.1
 http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
+
+# Run the jobs
+$ rake jobs:work
+
+
+# Deployment
+# Staging:  
+# Production:

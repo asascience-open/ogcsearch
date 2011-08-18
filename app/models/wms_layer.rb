@@ -23,6 +23,9 @@ class WmsLayer
   field :ur,          type: Array,        spacial: true
   spacial_index :ll
   spacial_index :ur
+  # BBox as WKT
+  field :bbox,        type: String
+  
   
   # Voting
   voteable self, :voting_field => :likes, :up => +1, :down => -1
