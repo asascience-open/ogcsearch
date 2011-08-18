@@ -40,5 +40,5 @@ $ rake jobs:work
 
 
 # Deployment
-# Staging:  
-# Production:
+# Staging:     git push ogc-staging master
+# Production:  git push ogc-production master
