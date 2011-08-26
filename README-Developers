@@ -1,0 +1,76 @@
+Requirements:  Ruby 1.9.2, MongoDB, Java 1.6.x (Solr)
+
+# Get Started:
+$ sudo yum install gcc gcc-c++ libxml2-devel bison flex make git openssl-devel readine-devel libxslt-devel java geos-devel proj-devel
+$ git clone git@github.com:asascience-open/ogcsearch.git
+$ cd ogcsearch
+$ gem install bundler --no-ri --no-rdoc
+$ bundle install
+
+
+# Start development
+# Start Solr
+$ rake sunspot:solr:start
+
+# Start the job runner
+$ rake jobs:work
+
+# Start the webserver
+$ rails server thin
+
+# Go to the homepage root
+$ firefox http://localhost:3000/
+
+
+
+
+# FAQ
+1.) Connection refused - connect(2)
+A - Start the Solr server: rake sunsport:solr:start
+
+
+
+# Maintenence
+
+# Reindex Solr:
+$ rake sunspot:reindex
+
+# Setup in Heroku
+$ heroku create ogc-staging --stack cedar --remote ogc-staging
+$ heroku addons:add mongolab:starter --app ogc-staging
+$ heroku config --app ogc-staging | grep MONGOLAB_URI
+    MONGOLAB_URI => mongodb://heroku_app736601:qjf170a5afe67ccjb85gq2u5n6@dbh29.mongolab.com:27297/heroku_app736601
+    # Paste the result (above) so:
+    production:
+      uri: mongodb://heroku_app736601:qjf170a5afe67ccjb85gq2u5n6@dbh29.mongolab.com:27297/heroku_app736601
+
+
+# Reinit voting:
+$ rake mongo:voteable:init_stats
+
+# Recalculate voting:
+$ rake mongo:voteable:remake_stats
+
+# Reset voting:
+$ rake mongo:voteable:reset_stats[WmsServer]
+$ rake mongo:voteable:reset_stats[WmsLayer]
+$ rake mongo:voteable:reset_stats[WmsStyle]
+
+
+# Sample parsing
+$ rails console
+> doc = Nokogiri::XML(open("http://asascience.mine.nu:8080/geoserver/ows?service=wms&version=1.1.1&request=GetCapabilities"))
+
+# Parse URL tests
+http://localhost:3000/wms/parse.json?url=http%3A%2F%2Ftds.maracoos.org%2FncWMS%2Fwms%3FSERVICE%3DWMS%26REQUEST%3DGetCapabilities%26VERSION%3D1.1.1
+http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
+
+
+# Deployment
+# Staging:     git push ogc-staging master
+# Production:  git push ogc-production master
+
+# GEMS
+votable_mongo - https://github.com/vinova/voteable_mongo
+mongoid_spacial - https://github.com/ryanong/mongoid_spacial
+voteable_mongo - https://github.com/angelim/voteable_mongo

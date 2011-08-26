@@ -4,52 +4,49 @@ class ParseWms < Struct.new(:id)
   def perform
     # Get the WmsServer
     server = WmsServer.find(id)
-    server.status = "Processing"
-    server.save!
-    
+
     doc = Nokogiri::XML(open(server.url))
-    
+
     # Metadata
     server.name = doc.xpath("//Service/Name").text.strip
     server.title = doc.xpath("//Service/Title").text.strip
     server.abstract = doc.xpath("//Service/Abstract").text.strip
-    server.keywords = doc.xpath("//Service/KeywordList/Keyword").collect{|c|c.text.strip}
+    server.keywords = doc.xpath("//Service/KeywordList/Keyword").map{|c|c.text.strip.downcase}.join(" ")
     server.contact = doc.xpath("//Service/ContactInformation/ContactPersonPrimary/ContactPerson").text.strip
     server.phone = doc.xpath("//Service/ContactInformation/ContactPersonPrimary/ContactVoiceTelephone").text.strip
     server.institution = doc.xpath("//Service/ContactInformation/ContactPersonPrimary/ContactOrganization").text.strip
     server.email = doc.xpath("//Service/ContactInformation/ContactPersonPrimary/ContactElectronicMailAddress").text.strip
-    
+
     # Formats
-    server.map_formats = doc.xpath("//Capability/Request/GetMap/Format").collect{|c|c.text.strip}
-    server.feature_formats = doc.xpath("//Capability/Request/GetFeatureInfo/Format").collect{|c|c.text.strip}
-    server.legend_formats = doc.xpath("//Capability/Request/GetLegendGraphic/Format").collect{|c|c.text.strip}
-    server.exceptions = doc.xpath("//Capability/Exception/Format").collect{|c|c.text.strip}
-    
+    server.map_formats = doc.xpath("//Capability/Request/GetMap/Format").map{|c|c.text.strip}
+    server.feature_formats = doc.xpath("//Capability/Request/GetFeatureInfo/Format").map{|c|c.text.strip}
+    server.legend_formats = doc.xpath("//Capability/Request/GetLegendGraphic/Format").map{|c|c.text.strip}
+    server.exceptions = doc.xpath("//Capability/Exception/Format").map{|c|c.text.strip}
+
     # Global Layer Projections from the first layer
-    server.projections = doc.xpath("//Capability/Layer[1]/SRS").collect{|c|c.text.strip}
-    
+    server.projections = doc.xpath("//Capability/Layer[1]/SRS").map{|c|c.text.strip}
+
     # Individual Layers
-    server.WmsLayers.delete_all
+    server.WmsLayers.destroy_all
     doc.xpath("//Layer").each do |xl|
-      layer = server.WmsLayers.new
-      server.WmsLayers.delete(layer) unless process_layer(xl, layer)
+      layer = server.WmsLayers.build
+      process_layer(xl, layer)
     end
-    server.status = nil
     server.save!
   end
-  
+
   def process_layer (xl, layer)
-  
+
     # Throw away layers that are layer containers
     return false unless xl.xpath("Layer").empty?
-  
+
     # Queryable
     layer.queryable = xl[:queryable] == 1.to_s ? true : false
     layer.name = xl.xpath("Name").text
     layer.title = xl.xpath("Title").text
     layer.abstract = xl.xpath("Abstract").text
-    layer.keywords = xl.xpath("KeywordList/Keyword").collect{|c|c.text}
-    
+    layer.keywords = xl.xpath("KeywordList/Keyword").map{|c|c.text.strip.downcase}.join(" ")
+
     # BBox
     lbbox = xl.xpath("LatLonBoundingBox").first
     if lbbox.nil?
@@ -65,35 +62,31 @@ class ParseWms < Struct.new(:id)
     layer.ur = {:lat => ur.lat, :lng => ur.lon}
     bbox =  RGeo::Cartesian::BoundingBox.new(factory)
     layer.bbox = bbox.add(ll).add(ur).to_geometry.as_text
-    
+
     # Elevation and Time
-    layer.WmsExtents.delete_all
+    layer.WmsExtents.destroy_all
     xl.xpath("Extent").each do |ext|
-      extent = WmsExtent.new
-      layer.WmsExtents << extent
-      extent.name = ext[:name]
-      extent.default_value = ext[:default]
-      extent.values = ext.text.split(",")
+      extent = layer.WmsExtents.build
+      extent.name = ext[:name].strip
+      extent.default_value = ext[:default].strip
+      extent.values = ext.text.split(",").map{|t|t.strip}
       extent.nearest_value = xl[:nearestValue] == 1.to_s ? true : false
       extent.multiple_values = xl[:mutipleValues] == 1.to_s ? true : false
       extent.current = xl[:current] == 1.to_s ? true : false
-      extent.save!
     end
-    
+
     # Styles
-    layer.WmsStyles.delete_all
+    layer.WmsStyles.destroy_all
     xl.xpath("Style").each do |sty|
-      style = WmsStyle.new
-      layer.WmsStyles << style
-      style.name = sty.xpath("Name").text
-      style.title = sty.xpath("Title").text
-      style.abstract = sty.xpath("Abstract").text
-      style.legend_width = sty.xpath("LegendURL").first[:width]
-      style.legend_height = sty.xpath("LegendURL").first[:height]
-      style.legend_format = sty.xpath("LegendURL/Format").text
-      style.legend_url = sty.xpath("LegendURL/OnlineResource").first[:href]
-      style.save!
+      style = layer.WmsStyles.build
+      style.name = sty.xpath("Name").text.strip
+      style.title = sty.xpath("Title").text.strip
+      style.abstract = sty.xpath("Abstract").text.strip
+      style.legend_width = sty.xpath("LegendURL").first[:width].strip
+      style.legend_height = sty.xpath("LegendURL").first[:height].strip
+      style.legend_format = sty.xpath("LegendURL/Format").text.strip
+      style.legend_url = sty.xpath("LegendURL/OnlineResource").first[:href].strip
     end
-    return layer.save
+    return
   end
 end

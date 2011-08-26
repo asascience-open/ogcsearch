@@ -1,22 +1,26 @@
 source 'http://rubygems.org'
 
-gem 'rails',   '3.0.9'
+gem 'rails',   '3.0.10'
+gem 'rake',    '0.9.2'
 
 # Database
-gem 'bson',    '1.3.1'
-gem 'bson_ext','1.3.1'
-gem 'mongo',   '1.3.1'
-gem 'mongoid', '2.1.7'
-gem 'mongoid_spacial', '0.2.12'
+gem 'bson'
+gem 'bson_ext'
+gem 'mongo'
+gem 'mongoid', '2.1.9'
+gem 'mongoid_spacial', '0.2.13'
 # This fork supports embedded document voting
 gem 'voteable_mongo', :git => 'http://github.com/angelim/voteable_mongo.git'
+gem 'mongoid_taggable'
 
 # DJ
 gem 'delayed_job', '2.1.4'
-gem 'delayed_job_mongoid', '1.0.1'
+gem 'delayed_job_mongoid', '1.0.4'
 
 # Searching
+gem 'sunspot'
 gem 'sunspot_rails'
+# Custom sunspot_mongoid
 gem 'sunspot_mongoid'
 
 # Webserver
