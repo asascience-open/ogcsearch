@@ -2,9 +2,9 @@ class WmsServer
   include Mongoid::Document
   include Mongoid::Timestamps
   include Mongo::Voteable
-  include Sunspot::Mongoid
+  include Mongoid::FullTextSearch
 
-  embeds_many :WmsLayers
+  has_many :wms_layers, :dependent => :destroy
 
   # Fields
   field :name,            type: String
@@ -22,23 +22,20 @@ class WmsServer
   field :legend_formats,  type: Array     #Strings
   field :exceptions,      type: Array     #Strings
 
-  field :keywords,        type: String
+  field :keywords,        type: Array,  default: []
   # User defined
-  field :tags,            type: String
+  field :tags,            type: Array,  default: []
 
   # Voting
   voteable self, :voting_field => :likes, :up => +1, :down => -1
 
   # Searching
-  searchable do
-    text :name
-    text :title
-    text :abstract
-    text :institution
-    text :tags
-    text :keywords
+  def search_fields
+    '%s %s %s %s %s %s' % [name, title, abstract, institution, keywords.join(" "), tags.join(" ")]
   end
+  fulltext_search_in :search_fields
 
+  # Callbacks
   before_destroy :remove_jobs
 
   # Provides normalization of URLs in and out of the database

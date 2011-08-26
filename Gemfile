@@ -11,17 +11,14 @@ gem 'mongoid', '2.1.9'
 gem 'mongoid_spacial', '0.2.13'
 # This fork supports embedded document voting
 gem 'voteable_mongo', :git => 'http://github.com/angelim/voteable_mongo.git'
-gem 'mongoid_taggable'
 
 # DJ
 gem 'delayed_job', '2.1.4'
 gem 'delayed_job_mongoid', '1.0.4'
 
 # Searching
-gem 'sunspot'
-gem 'sunspot_rails'
-# Custom sunspot_mongoid
-gem 'sunspot_mongoid'
+# https://github.com/aaw/mongoid_fulltext
+gem 'mongoid_fulltext'
 
 # Webserver
 gem 'thin'

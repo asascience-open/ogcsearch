@@ -11,7 +11,7 @@ class ParseWms < Struct.new(:id)
     server.name = doc.xpath("//Service/Name").text.strip
     server.title = doc.xpath("//Service/Title").text.strip
     server.abstract = doc.xpath("//Service/Abstract").text.strip
-    server.keywords = doc.xpath("//Service/KeywordList/Keyword").map{|c|c.text.strip.downcase}.join(" ")
+    server.keywords = doc.xpath("//Service/KeywordList/Keyword").map{|c|c.text.strip.downcase}
     server.contact = doc.xpath("//Service/ContactInformation/ContactPersonPrimary/ContactPerson").text.strip
     server.phone = doc.xpath("//Service/ContactInformation/ContactPersonPrimary/ContactVoiceTelephone").text.strip
     server.institution = doc.xpath("//Service/ContactInformation/ContactPersonPrimary/ContactOrganization").text.strip
@@ -27,10 +27,12 @@ class ParseWms < Struct.new(:id)
     server.projections = doc.xpath("//Capability/Layer[1]/SRS").map{|c|c.text.strip}
 
     # Individual Layers
-    server.WmsLayers.destroy_all
+    server.wms_layers.destroy_all
     doc.xpath("//Layer").each do |xl|
-      layer = server.WmsLayers.build
+      layer = WmsLayer.create
       process_layer(xl, layer)
+      layer.save!
+      server.wms_layers << layer
     end
     server.save!
   end
@@ -45,7 +47,7 @@ class ParseWms < Struct.new(:id)
     layer.name = xl.xpath("Name").text
     layer.title = xl.xpath("Title").text
     layer.abstract = xl.xpath("Abstract").text
-    layer.keywords = xl.xpath("KeywordList/Keyword").map{|c|c.text.strip.downcase}.join(" ")
+    layer.keywords = xl.xpath("KeywordList/Keyword").map{|c|c.text.strip.downcase}
 
     # BBox
     lbbox = xl.xpath("LatLonBoundingBox").first
@@ -64,9 +66,9 @@ class ParseWms < Struct.new(:id)
     layer.bbox = bbox.add(ll).add(ur).to_geometry.as_text
 
     # Elevation and Time
-    layer.WmsExtents.destroy_all
+    layer.wms_extents.destroy_all
     xl.xpath("Extent").each do |ext|
-      extent = layer.WmsExtents.build
+      extent = layer.wms_extents.build
       extent.name = ext[:name].strip
       extent.default_value = ext[:default].strip
       extent.values = ext.text.split(",").map{|t|t.strip}
@@ -76,9 +78,9 @@ class ParseWms < Struct.new(:id)
     end
 
     # Styles
-    layer.WmsStyles.destroy_all
+    layer.wms_styles.destroy_all
     xl.xpath("Style").each do |sty|
-      style = layer.WmsStyles.build
+      style = layer.wms_styles.build
       style.name = sty.xpath("Name").text.strip
       style.title = sty.xpath("Title").text.strip
       style.abstract = sty.xpath("Abstract").text.strip

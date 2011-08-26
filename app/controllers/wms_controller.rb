@@ -33,16 +33,10 @@ class WmsController < ApplicationController
   end
 
   def search
-    search = Sunspot.search(WmsLayer) do
-      keywords params[:terms]
-    end
-    results = []
-    search.each_hit_with_result do
-
-    end
+    layers = WmsLayer.fulltext_search(params[:terms])
     respond_to do |format|
-      format.json { render :json => hi }
-      format.xml { render :xml => hi }
+      format.json { render :json => layers }
+      format.xml { render :xml => layers }
     end
   end
 

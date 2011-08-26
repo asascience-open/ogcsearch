@@ -74,3 +74,4 @@ http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%
 votable_mongo - https://github.com/vinova/voteable_mongo
 mongoid_spacial - https://github.com/ryanong/mongoid_spacial
 voteable_mongo - https://github.com/angelim/voteable_mongo
+mongoid_fulltext - https://github.com/aaw/mongoid_fulltext
