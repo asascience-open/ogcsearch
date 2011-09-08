@@ -3,7 +3,7 @@ class WmsStyle
   include Mongo::Voteable
 
   embedded_in :WmsLayer
-  
+
   # Fields
   field :name,            type: String
   field :title,           type: String
@@ -12,5 +12,5 @@ class WmsStyle
   field :legend_width,    type: String
   field :legend_height,   type: String
   field :legend_url,      type: String
-  
+
 end

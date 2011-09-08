@@ -54,6 +54,10 @@ class WmsServer
     !Job.where(data: self.id).empty?
   end
 
+  def likes_json
+    self.likes.as_json(:only => ["up", "down"])
+  end
+
   private
     def remove_jobs
       Job.where(data: self.id).destroy_all

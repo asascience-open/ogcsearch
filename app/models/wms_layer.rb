@@ -38,4 +38,8 @@ class WmsLayer
   end
   fulltext_search_in :search_fields
 
+  def likes_json
+    self.likes.as_json(:only => ["up", "down"])
+  end
+
 end

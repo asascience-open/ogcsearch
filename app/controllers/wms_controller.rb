@@ -26,7 +26,7 @@ class WmsController < ApplicationController
     fixed_url = WmsServer.normalize_url(params[:url])
     server = WmsServer.where(url: fixed_url).first
     if server.locked?
-      render :text => server.status, :status => 202
+      render :text => "LOCKED", :status => 202
     else
       render :text => "OK", :status => 202
     end
@@ -35,7 +35,15 @@ class WmsController < ApplicationController
   def search
     layers = WmsLayer.fulltext_search(params[:terms])
     respond_to do |format|
-      format.json { render :json => layers }
+      format.json { render :json => layers.as_json(
+        :only => [:name, :title, :abstract, :queryable, :thumbnail, :bbox],
+        :methods => [:likes_json],
+        :include => {:wms_server => {
+                        :only => [:name, :url, :projections, :map_formats, :exceptions],
+                        :methods => [:likes_json]
+                      }
+                    },
+                  )}
       format.xml { render :xml => layers }
     end
   end
