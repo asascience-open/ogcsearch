@@ -42,4 +42,8 @@ class WmsLayer
     self.likes.as_json(:only => ["up", "down"])
   end
 
+  def wms_styles_json
+    self.wms_styles.as_json(:only => [:name, :title, :abstract, :legend_url])
+  end
+
 end
