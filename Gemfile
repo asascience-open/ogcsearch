@@ -1,14 +1,14 @@
 source 'http://rubygems.org'
 
-gem 'rails',   '3.0.10'
-gem 'rake',    '0.9.2'
+gem 'rails'
+gem 'rake'
 
 # Database
 gem 'bson'
 gem 'bson_ext'
 gem 'mongo'
-gem 'mongoid', '2.1.9'
-gem 'mongoid_spacial', '0.2.13'
+gem 'mongoid'
+gem 'mongoid_spacial'
 # This fork supports embedded document voting
 gem 'voteable_mongo', :git => 'http://github.com/angelim/voteable_mongo.git'
 
