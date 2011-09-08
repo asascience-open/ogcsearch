@@ -29,6 +29,8 @@ class WmsServer
   # Voting
   voteable self, :voting_field => :likes, :up => +1, :down => -1
 
+  MAPPING_PROJECTIONS = ["EPSG:4326","EPSG:900913","EPSG:41001","EPSG:3857"]
+
   # Searching
   def search_fields
     '%s %s %s %s %s %s' % [name, title, abstract, institution, keywords.join(" "), tags.join(" ")]
@@ -56,6 +58,10 @@ class WmsServer
 
   def likes_json
     self.likes.as_json(:only => ["up", "down"])
+  end
+
+  def mapping_projections
+    MAPPING_PROJECTIONS & self.projections
   end
 
   private

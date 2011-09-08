@@ -39,8 +39,8 @@ class WmsController < ApplicationController
         :only => ["_id", :name, :title, :abstract, :queryable, :thumbnail, :bbox],
         :methods => [:likes_json, :wms_styles_json],
         :include => {:wms_server =>
-                      { :only => [:name, :url, :projections, :map_formats, :exceptions],
-                        :methods => [:likes_json]
+                      { :only => [:name, :url, :map_formats, :exceptions],
+                        :methods => [:likes_json, :mapping_projections]
                       }
                     }
                   )}
