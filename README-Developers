@@ -59,6 +59,7 @@ $ rake mongo:voteable:reset_stats[WmsStyle]
 
 # Sample parsing
 $ rails console
+> require 'open-uri'
 > doc = Nokogiri::XML(open("http://asascience.mine.nu:8080/geoserver/ows?service=wms&version=1.1.1&request=GetCapabilities"))
 
 # Parse URL tests
@@ -68,6 +69,9 @@ $ rails console
   http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
   # ASA ECOP Services
   http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fservices.asascience.com%2Fecop%2Fwms.aspx%3Frequest%3DGetCapabilities%26service%3Dwms%26version%3D1.1.1
+  # NOAA Nowcoast
+  http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fnowcoast.noaa.gov%2Fwms%2Fcom.esri.wms.Esrimap%2Fwwa%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
+
 
 # Deployment
 # Staging:     git push ogc-staging master
