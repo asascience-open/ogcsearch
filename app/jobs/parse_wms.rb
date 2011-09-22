@@ -1,9 +1,14 @@
 require 'open-uri'
 
-class ParseWms < Struct.new(:id)
+class ParseWms < GlobalJob
+
+  def initialize(id)
+    @wms_server_id = id
+  end
+
   def perform
-    # Get the WmsServer
-    server = WmsServer.find(id)
+    # Get the WmsServer, wms_server_id is passed through the ParseWms.new(:wms_server_id => xxx)
+    server = WmsServer.find(@wms_server_id)
 
     doc = Nokogiri::XML(open(server.url))
 
@@ -34,6 +39,7 @@ class ParseWms < Struct.new(:id)
       layer.save!
       server.wms_layers << layer
     end
+    server.scanned = Time.now.utc
     server.save!
   end
 

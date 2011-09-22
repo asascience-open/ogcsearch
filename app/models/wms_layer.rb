@@ -28,7 +28,6 @@ class WmsLayer
   # BBox as WKT
   field :bbox,        type: String
 
-
   # Voting
   voteable self, :voting_field => :likes, :up => +1, :down => -1
 

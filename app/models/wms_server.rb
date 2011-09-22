@@ -26,10 +26,10 @@ class WmsServer
   # User defined
   field :tags,            type: Array,  default: []
 
+  index :url, unique: true
+
   # Voting
   voteable self, :voting_field => :likes, :up => +1, :down => -1
-
-  MAPPING_PROJECTIONS = ["EPSG:4326","EPSG:900913","EPSG:41001","EPSG:3857"]
 
   # Searching
   def search_fields
@@ -40,33 +40,42 @@ class WmsServer
   # Callbacks
   before_destroy :remove_jobs
 
-  # Provides normalization of URLs in and out of the database
+  scope :active, -> { where(:scanned.lte => 1.week.ago.utc) }
+  scope :not_active, -> { where(:scanned.gt => 1.week.ago.utc) }
+  scope :not_active_since, ->(before) { where(:scanned.lte => before.utc) }
+
+  def url=(_url)
+    write_attribute(:url, URI.unescape(_url))
+  end
+
+  # Provides normalization and validation of URLs in and out of the database
   def self.normalize_url(url)
-    url
+    return nil if url.nil? || url.blank?
+    uri = URI.parse(url)
+    return nil unless [URI::HTTP, URI::HTTPS].include?(uri.class)
+    URI.unescape(url)
   end
 
   def parse
-    job = Delayed::Job.enqueue(ParseWms.new(self.id))
-    job[:type] = ParseWms.to_s
-    job[:data] = self.id.to_s
-    job.save
+    pw = ParseWms.new(self.id)
+    pw.data = self.id.to_s
+    Delayed::Job.enqueue(pw)
   end
 
   def locked?
-    !Job.where(data: self.id).empty?
+    !Job.where(type: "ParseWms", data: self.id.to_s).empty?
   end
 
   def likes_json
     self.likes.as_json(:only => ["up", "down"])
   end
 
-  def mapping_projections
-    MAPPING_PROJECTIONS & self.projections
+  def web_mapping_projections
+    WEB_MAPPING_PROJECTIONS & self.projections
   end
 
-  private
-    def remove_jobs
-      Job.where(data: self.id).destroy_all
-    end
+  def remove_jobs
+    Job.where(type: "ParseWms", data: self.id.to_s).destroy_all
+  end
 
 end
