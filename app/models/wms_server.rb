@@ -71,7 +71,7 @@ class WmsServer
   end
 
   def web_mapping_projections
-    WEB_MAPPING_PROJECTIONS & self.projections
+    WEB_MAPPING_PROJECTIONS & self.projections unless self.projection.nil?
   end
 
   def remove_jobs
