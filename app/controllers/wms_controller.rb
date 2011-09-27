@@ -16,7 +16,7 @@ class WmsController < ApplicationController
   end
 
   def find
-    server = WmsServer.where(url: @fixed_url, include: wms_layers).first
+    server = WmsServer.where(url: @fixed_url).first
     server = [nil] if server.nil?
     respond_to do |format|
       format.json { render :json => server.as_json(
