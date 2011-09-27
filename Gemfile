@@ -29,6 +29,9 @@ gem 'heroku'
 # Caching
 gem 'dalli'
 
+# Paging
+gem 'kaminari'
+
 # Application
 gem 'nokogiri'
 gem 'rgeo' # Requires the 'proj-devel' and 'geos-devel' packages

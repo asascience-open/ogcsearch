@@ -7,29 +7,17 @@
 	  var oTable = $('#wms_servers').dataTable( {
   	  "bJQueryUI": true,
 	    "bProcessing": true,
-      "sAjaxSource": "/wms/index.dataTable",
+	    "bServerSide": true,
+	    "sPaginationType": "full_numbers",
+      "sAjaxSource": "/wms/populate.dataTable",
       "aoColumns": [
-        { "mDataProp": "name" },
-        { "mDataProp": "title" },
-        { "mDataProp": "url" },
-        { "mDataProp": "keywords" },
-        { "mDataProp": "tags" }
+        { "sTitle": "Name", "sName": "name", "mDataProp": "name" },
+        { "sTitle": "Title", "sName": "title", "mDataProp": "title" },
+        { "sTitle": "GetCap URL", "sName": "url", "mDataProp": "url" },
+        { "sTitle": "Keywords", "sName": "keywords", "mDataProp": "keywords" },
+        { "sTitle": "Tags", "sName": "tags", "mDataProp": "tags" },
+        { "sTitle": "Last Scanned", "sName": "scanned", "mDataProp": "scanned" }
       ]
 	  });
-
-	  /* Apply the jEditable handlers to the table */
-	  $('td', oTable.fnGetNodes()).editable( '/admin/wms/update.json', {
-		  "callback": function( sValue, y ) {
-			  var aPos = oTable.fnGetPosition( this );
-			  oTable.fnUpdate( sValue, aPos[0], aPos[1] );
-		  },
-		  "submitdata": function ( value, settings ) {
-			  return {
-				  "row_id": this.parentNode.getAttribute('id'),
-				  "column": oTable.fnGetPosition( this )[2]
-			  };
-		  },
-		  "height": "14px"
-	  } );
-  } );
+  });
 </script>

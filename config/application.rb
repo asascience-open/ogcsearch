@@ -37,7 +37,7 @@ module Ogcsearch
 
     # JavaScript files you want as :defaults (application.js is always included).
     config.action_view.javascript_expansions[:defaults] = []
-    config.action_view.javascript_expansions[:admin] =    ["http://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js", "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js", "rails", "jquery.jeditable.min", "jquery.dataTables.min"]
+    config.action_view.javascript_expansions[:admin] =    ["http://ajax.googleapis.com/ajax/libs/jquery/1.6.3/jquery.min.js", "rails", "jquery.jeditable.min", "jquery.dataTables.min", "http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"]
 
     # Configure the default encoding used in templates for Ruby 1.9.
     config.encoding = "utf-8"

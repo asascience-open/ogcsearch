@@ -59,6 +59,8 @@ GEM
       term-ansicolor (~> 1.0.5)
     hike (1.2.1)
     i18n (0.6.0)
+    kaminari (0.12.4)
+      rails (>= 3.0.0)
     launchy (2.0.5)
       addressable (~> 2.2.6)
     mail (2.3.0)
@@ -137,6 +139,7 @@ DEPENDENCIES
   delayed_job (= 2.1.4)
   delayed_job_mongoid (= 1.0.4)
   heroku
+  kaminari
   mongo
   mongoid
   mongoid_fulltext

@@ -15,6 +15,7 @@ class WmsLayer
   field :abstract,    type: String
   field :queryable,   type: Boolean
   field :thumbnail,   type: String
+  field :projections, type: Array     #Strings
 
   field :keywords,    type: Array,  default: []
   # User defined
@@ -39,6 +40,10 @@ class WmsLayer
 
   def likes_json
     self.likes.as_json(:only => ["up", "down"])
+  end
+
+  def web_mapping_projections
+    WEB_MAPPING_PROJECTIONS & self.projections unless self.projections.nil?
   end
 
   def wms_styles_json

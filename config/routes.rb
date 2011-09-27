@@ -9,6 +9,7 @@ Ogcsearch::Application.routes.draw do
   match 'wms/status.:format' => 'wms#status'
   match 'wms/search.:format' => 'wms#search'
   match 'wms/index.:format' => 'wms#index'
+  match 'wms/populate.:format' => 'wms#populate'
 
   root :to => "client#index"
 

@@ -36,6 +36,7 @@ class ParseWms < GlobalJob
     doc.xpath("//Layer").each do |xl|
       layer = WmsLayer.create
       process_layer(xl, layer)
+      layer.projections = (layer.projections + server.projections).uniq
       layer.save!
       server.wms_layers << layer
     end
@@ -54,6 +55,7 @@ class ParseWms < GlobalJob
     layer.title = xl.xpath("Title").text
     layer.abstract = xl.xpath("Abstract").text
     layer.keywords = xl.xpath("KeywordList/Keyword").map{|c|c.text.strip.downcase}
+    layer.projections = xl.xpath("SRS").map{|c|c.text.strip}
 
     # BBox
     lbbox = xl.xpath("LatLonBoundingBox").first
