@@ -2,12 +2,33 @@ class WmsController < ApplicationController
 
   before_filter :normalize_url, :only => [:find, :parse, :status]
 
+  def index
+    @servers = WmsServer.all
+    respond_to do |format|
+      format.dataTable {
+        render :json => { :aaData => @servers.as_json(
+          :only => [:name, :title, :url, :keywords, :tags, :scanned],
+          :methods => [:web_mapping_projections]
+        )}
+      }
+      format.html
+    end
+  end
+
   def find
-    server = WmsServer.where(url: @fixed_url).first
+    server = WmsServer.where(url: @fixed_url, include: wms_layers).first
     server = [nil] if server.nil?
     respond_to do |format|
-      format.json { render :json => server }
-      format.xml { render :xml => server }
+      format.json { render :json => server.as_json(
+        :only => [:name, :url, :map_formats, :exceptions],
+        :methods => [:likes_json, :web_mapping_projections],
+        :include => {:wms_layers =>
+                      {
+                        :only => ["_id", :name, :title, :abstract, :queryable, :thumbnail, :bbox],
+                        :methods => [:likes_json, :wms_styles_json]
+                      }
+                    }
+                  )}
     end
   end
 
@@ -16,6 +37,8 @@ class WmsController < ApplicationController
     if server.locked?
       render :text => "ALREADY PROCESSING", :status => 202
     else
+      server.tags << params[:terms] unless params[:terms].nil?
+      server.save
       server.parse
       render :text => "OK", :status => 202
     end
@@ -23,7 +46,9 @@ class WmsController < ApplicationController
 
   def status
     server = WmsServer.where(url: @fixed_url).first
-    if server.locked?
+    if server.nil?
+      render :text => "SERVER UNKNOWN", :status => 202
+    elsif server.locked?
       render :text => "LOCKED", :status => 202
     else
       render :text => "OK", :status => 202

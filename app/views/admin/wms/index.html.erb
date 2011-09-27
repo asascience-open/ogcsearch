@@ -1,0 +1,35 @@
+<table id="wms_servers"></table>
+
+<script type="text/javascript">
+
+  $(document).ready(function() {
+	  /* Init DataTables */
+	  var oTable = $('#wms_servers').dataTable( {
+  	  "bJQueryUI": true,
+	    "bProcessing": true,
+      "sAjaxSource": "/wms/index.dataTable",
+      "aoColumns": [
+        { "mDataProp": "name" },
+        { "mDataProp": "title" },
+        { "mDataProp": "url" },
+        { "mDataProp": "keywords" },
+        { "mDataProp": "tags" }
+      ]
+	  });
+
+	  /* Apply the jEditable handlers to the table */
+	  $('td', oTable.fnGetNodes()).editable( '/admin/wms/update.json', {
+		  "callback": function( sValue, y ) {
+			  var aPos = oTable.fnGetPosition( this );
+			  oTable.fnUpdate( sValue, aPos[0], aPos[1] );
+		  },
+		  "submitdata": function ( value, settings ) {
+			  return {
+				  "row_id": this.parentNode.getAttribute('id'),
+				  "column": oTable.fnGetPosition( this )[2]
+			  };
+		  },
+		  "height": "14px"
+	  } );
+  } );
+</script>
