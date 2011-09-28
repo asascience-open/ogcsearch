@@ -36,7 +36,7 @@ class ParseWms < GlobalJob
     doc.xpath("//Layer").each do |xl|
       layer = WmsLayer.create
       process_layer(xl, layer)
-      layer.projections = (layer.projections + server.projections).uniq
+      layer.projections = (layer.projections + server.projections).uniq rescue server.projections
       layer.save!
       server.wms_layers << layer
     end
