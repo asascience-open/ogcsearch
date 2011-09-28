@@ -25,19 +25,25 @@ class Admin::WmsController < Admin::AdminController
     respond_to do |format|
       format.dataTable {
         render :json => {
-        :sEcho => params[:sEcho],
-        :iTotalRecords => servers.total_count,
-        :iTotalDisplayRecords => servers.total_count,
-        :aaData => servers.as_json(
-          :only => [:name, :title, :url, :keywords, :tags, :scanned]
-        )}
+          :sEcho => params[:sEcho],
+          :iTotalRecords => servers.total_count,
+          :iTotalDisplayRecords => servers.total_count,
+          :aaData => servers.as_json({
+            :methods => [:DT_RowId],
+            :only => [:name, :title, :url, :keywords, :tags, :scanned]
+          })
+        }
       }
       format.html
     end
   end
 
   def destroy
-
+    status = WmsServer.where(id: params[:id]).destroy ? 200 : 500
+    respond_to do |format|
+      format.html
+      format.json  { render :json => {}, :status => status }
+    end
   end
 
   def update

@@ -68,6 +68,10 @@ class WmsServer
     !Job.locked.where(job_type: ParseWms.to_s, job_data: self.id.to_s).empty?
   end
 
+  def DT_RowId
+    self.id.to_s
+  end
+
   def pending?
     !Job.pending.where(job_type: ParseWms.to_s, job_data: self.id.to_s).empty?
   end

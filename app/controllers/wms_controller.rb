@@ -24,21 +24,21 @@ class WmsController < ApplicationController
     server.tags << params[:terms] unless params[:terms].nil?
     server.save
     if server.locked?
-      render :text => "ALREADY PROCESSING", :status => 202
+      render :json => {:status => "ALREADY PROCESSING"}, :status => :ok
     else
       server.parse if (params[:force] || server.scanned.nil? || server.scanned < 1.day.ago)
-      render :text => "OK", :status => 202
+      render :json => {:status => "OK"}, :status => :ok
     end
   end
 
   def status
     server = WmsServer.where(url: @fixed_url).first
     if server.nil?
-      render :text => "SERVER UNKNOWN", :status => 202
+      render :json => {:status => "SERVER UNKNOWN"}, :status => :ok
     elsif server.locked?
-      render :text => "LOCKED", :status => 202
+      render :json => {:status => "LOCKED"}, :status => :ok
     else
-      render :text => "OK", :status => 202
+      render :json => {:status => "OK"}, :status => :ok
     end
   end
 
@@ -69,7 +69,7 @@ class WmsController < ApplicationController
     def normalize_url
       @fixed_url = WmsServer.normalize_url(params[:url])
       if @fixed_url.blank? || @fixed_url.nil?
-        render :text => "Invalid URL parameter"
+        render :json => {:status => "Invalid URL parameter"}
       end
     end
 
