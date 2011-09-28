@@ -77,8 +77,8 @@ class ParseWms < GlobalJob
     layer.wms_extents.destroy_all
     xl.xpath("Extent").each do |ext|
       extent = layer.wms_extents.build
-      extent.name = ext[:name].strip
-      extent.default_value = ext[:default].strip
+      extent.name = ext.xpath("@name").text.strip
+      extent.default_value = ext.xpath("@default").text.strip
       extent.values = ext.text.split(",").map{|t|t.strip}
       extent.nearest_value = xl[:nearestValue] == 1.to_s ? true : false
       extent.multiple_values = xl[:mutipleValues] == 1.to_s ? true : false
@@ -92,10 +92,10 @@ class ParseWms < GlobalJob
       style.name = sty.xpath("Name").text.strip
       style.title = sty.xpath("Title").text.strip
       style.abstract = sty.xpath("Abstract").text.strip
-      style.legend_width = sty.xpath("LegendURL").first[:width].strip
-      style.legend_height = sty.xpath("LegendURL").first[:height].strip
+      style.legend_width = sty.xpath("LegendURL/@width").text.strip
+      style.legend_height = sty.xpath("LegendURL/@height").text.strip
       style.legend_format = sty.xpath("LegendURL/Format").text.strip
-      style.legend_url = sty.xpath("LegendURL/OnlineResource").first[:href].strip
+      style.legend_url = sty.xpath("LegendURL/OnlineResource/@xlink:href").text.strip
     end
     return
   end
