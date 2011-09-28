@@ -3,12 +3,12 @@ class GlobalJob
   # Call back to save Job data
   def enqueue(job)
     job[:job_type] = self.class.to_s
-    job[:data] = @data
+    job[:job_data] = @job_data
     job.save
   end
 
-  def data=(data)
-    @data = data
+  def job_data=(job_data)
+    @job_data = job_data
   end
 
 end
