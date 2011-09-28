@@ -12,7 +12,7 @@ class WmsController < ApplicationController
         :include => {:wms_layers =>
                       {
                         :only => ["_id", :name, :title, :abstract, :queryable, :thumbnail, :bbox],
-                        :methods => [:likes_json, :wms_styles_json, :web_mapping_projections]
+                        :methods => [:likes_json, :wms_styles_json, :web_mapping_projections, :server_url]
                       }
                     }
                   )}

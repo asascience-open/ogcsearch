@@ -50,4 +50,8 @@ class WmsLayer
     self.wms_styles.as_json(:only => [:name, :title, :abstract, :legend_url])
   end
 
+  def server_url
+    wms_server.url
+  end
+
 end
