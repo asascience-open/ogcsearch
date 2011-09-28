@@ -21,12 +21,12 @@ class WmsController < ApplicationController
 
   def parse
     server = WmsServer.find_or_create_by(url: @fixed_url)
+    server.tags << params[:terms] unless params[:terms].nil?
+    server.save
     if server.locked?
       render :text => "ALREADY PROCESSING", :status => 202
     else
-      server.tags << params[:terms] unless params[:terms].nil?
-      server.save
-      server.parse
+      server.parse if (params[:force] || server.scanned.nil? || server.scanned < 1.day.ago)
       render :text => "OK", :status => 202
     end
   end
