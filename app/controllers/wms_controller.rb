@@ -21,7 +21,7 @@ class WmsController < ApplicationController
 
   def parse
     server = WmsServer.find_or_create_by(url: @fixed_url)
-    server.tags << params[:terms] unless params[:terms].nil?
+    server.tags << params[:terms] unless params[:terms].nil? || server.tags.include?(params[:terms])
     server.save
     if server.locked?
       render :json => {:status => "ALREADY PROCESSING"}, :status => :ok
