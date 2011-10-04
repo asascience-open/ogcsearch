@@ -1,6 +1,8 @@
+require 'open-uri'
+
 class WmsController < ApplicationController
 
-  before_filter :normalize_url, :only => [:find, :parse, :status]
+  before_filter :normalize_url, :only => [:find, :parse, :status, :extract]
 
   def find
     server = WmsServer.where(url: @fixed_url).first
@@ -62,6 +64,18 @@ class WmsController < ApplicationController
                         }
           )}
         }
+    end
+  end
+
+  def extract
+    doc = Nokogiri::HTML(open(@fixed_url))
+    hrefs = doc.xpath("//a/@href").map do |s|
+      if /service=wms/i =~ s.text && /request=getcapabilities/i =~ s.text
+        URI::join(@fixed_url,s.text).to_s.gsub(/([^:])\/\//, '\1/') rescue nil
+      end
+    end.compact.uniq
+    respond_to do |format|
+      format.json { render :json => hrefs }
     end
   end
 

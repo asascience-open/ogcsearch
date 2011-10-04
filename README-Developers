@@ -73,6 +73,13 @@ $ rails console
   http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fnowcoast.noaa.gov%2Fwms%2Fcom.esri.wms.Esrimap%2Fwwa%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
 
 
+# Sample extraction
+
+  http://localhost:3000/wms/extract.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%2Fgeoserver%2Fweb%2F
+  http://localhost:3000/wms/extract.json?url=http%3A%2F%2Fwww.skylab-mobilesystems.com%2Fen%2Fwms_serverlist.html
+
+
+
 # Deployment
 # Staging:     git push ogc-staging master
 # Production:  git push ogc-production master
