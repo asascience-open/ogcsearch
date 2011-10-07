@@ -22,7 +22,8 @@ $ rails server thin
 $ firefox http://localhost:3000/
 
 
-
+# Set admin password:
+heroku config:add WEB_ADMIN_PASSWORD=xxxxx
 
 # FAQ
 1.) Connection refused - connect(2)

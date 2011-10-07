@@ -6,7 +6,7 @@ class Admin::AdminController < ApplicationController
   def verify_access
     authenticate_or_request_with_http_basic("Restricted Access") do |username, password|
       username == 'admin'
-      password == 'lapkok'
+      password == ENV['WEB_ADMIN_PASSWORD']
     end if Rails.env.production? || Rails.env.staging?
 
   end
