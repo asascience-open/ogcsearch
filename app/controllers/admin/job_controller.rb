@@ -26,7 +26,7 @@ class Admin::JobController < Admin::AdminController
   end
 
   def destroy
-    status = WmsServer.where(id: params[:id]).destroy ? 200 : 500
+    status = Job.where(id: params[:id]).destroy ? 200 : 500
     respond_to do |format|
       format.html
       format.json  { render :json => {:status => status}, :status => status }
