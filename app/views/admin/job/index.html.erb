@@ -1,0 +1,49 @@
+<table id="jobs"></table>
+
+<script type="text/javascript">
+
+  function makeActionButtons(oObj) {
+    var text = "";
+    text += "<a href='#' class='destroyer' name='" + oObj.aData.DT_RowId + "'>Delete</a> ";
+    return text;
+  }
+
+  var oTable;
+
+  $(document).ready(function() {
+
+	  /* Init DataTables */
+	  oTable = $('#jobs').dataTable( {
+  	  "bJQueryUI": true,
+	    "bProcessing": true,
+	    "bServerSide": true,
+	    "bDeferRender": true,
+	    "sPaginationType": "full_numbers",
+      "sAjaxSource": "/admin/job/populate.dataTable",
+      "aoColumns": [
+        { "sTitle": "Job Type", "sName": "job_type", "mDataProp": "job_type" },
+        { "sTitle": "Job Data", "sName": "job_data", "mDataProp": "job_data" },
+        { "sTitle": "Attempts", "sName": "attempts", "mDataProp": "attempts" },
+        { "sTitle": "Run At", "sName": "run_at", "mDataProp": "run_at" },
+        { "sTitle": "Actions", "sName": "action", "mDataProp": null, "fnRender": function (oObj){ return makeActionButtons(oObj); } }
+      ],
+      "fnDrawCallback": function(oSettings, json) {
+        $(".destroyer").click(function(e) {
+          e.preventDefault();
+          var id = $(e.target).attr('name');
+          $.ajax({
+            type: "DELETE",
+            url: "/admin/job/"+id+".json",
+            success: function(){
+              var tr = $("#"+id);
+              oTable.fnDraw();
+            },
+            error: function(){
+              alert('Failed to delete Job');
+            }
+          });
+        });
+      }
+	  });
+  });
+</script>

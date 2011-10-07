@@ -10,4 +10,8 @@ class Job
 
   store_in :delayed_backend_mongoid_jobs
 
+  def DT_RowId
+    self.id.to_s
+  end
+
 end

@@ -4,6 +4,9 @@ Ogcsearch::Application.routes.draw do
     resources :wms, :only => [:index, :destroy] do
       get 'populate', :on => :collection
     end
+    resources :job, :only => [:index, :destroy] do
+      get 'populate', :on => :collection
+    end
   end
 
   match 'wms/find.:format' => 'wms#find'
