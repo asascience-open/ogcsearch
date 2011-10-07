@@ -64,6 +64,7 @@ $ rails console
 
 
 # Parse URL tests
+  # 1.1.1
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Ftds.maracoos.org%2FncWMS%2Fwms%3FSERVICE%3DWMS%26REQUEST%3DGetCapabilities%26VERSION%3D1.1.1
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fservices.asascience.com%2Fecop%2Fwms.aspx%3Frequest%3DGetCapabilities%26service%3Dwms%26version%3D1.1.1
@@ -75,7 +76,8 @@ $ rails console
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fna.unep.net%2Fcgi-bin%2FWind%3Frequest%3Dgetcapabilities%26Service%3Dwms%26version%3D1.1.1
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fciesin.columbia.edu%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1%26request%3DGetCapabilities
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fdisc1.sci.gsfc.nasa.gov%2Fdaac-bin%2Fwms_omi%3Fservice%3Dwms%26version%3D1.1.1%26request%3Dgetcapabilities
-
+  # 1.3.0
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Ftds.maracoos.org%2FncWMS%2Fwms%3FSERVICE%3DWMS%26REQUEST%3DGetCapabilities%26VERSION%3D1.3.0
 
 # Sample extraction
 

@@ -30,7 +30,7 @@ class Admin::WmsController < Admin::AdminController
           :iTotalDisplayRecords => servers.total_count,
           :aaData => servers.as_json({
             :methods => [:DT_RowId],
-            :only => [:name, :title, :url, :keywords, :tags, :scanned]
+            :only => [:name, :title, :version, :url, :keywords, :tags, :scanned]
           })
         }
       }

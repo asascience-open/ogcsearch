@@ -11,6 +11,7 @@ class WmsServer
   field :title,           type: String
   field :abstract,        type: String
   field :url,             type: String
+  field :version,         type: String
   field :scanned,         type: DateTime
   field :email,           type: String
   field :contact,         type: String
@@ -24,6 +25,9 @@ class WmsServer
   field :keywords,        type: Array,  default: []
   # User defined
   field :tags,            type: Array,  default: []
+
+  # Record messages
+  field :status,          type: String
 
   index :url, unique: true
 
