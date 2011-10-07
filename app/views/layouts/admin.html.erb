@@ -7,8 +7,17 @@
   <%= csrf_meta_tag %>
 </head>
 <body>
-
-<%= yield %>
-
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="container">
+        <ul class="nav">
+          <li><%= link_to "WMS Servers", admin_wms_index_path %></li>
+          <li><%= link_to "Jobs", admin_job_index_path %></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="clear"></div>
+  <%= yield %>
 </body>
 </html>
