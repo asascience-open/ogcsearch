@@ -60,17 +60,21 @@ $ rake mongo:voteable:reset_stats[WmsStyle]
 # Sample parsing
 $ rails console
 > require 'open-uri'
-> doc = Nokogiri::XML(open("http://asascience.mine.nu:8080/geoserver/ows?service=wms&version=1.1.1&request=GetCapabilities"))
+> doc = Nokogiri::XML(open("http://na.unep.net/cgi-bin/Wind?request=getcapabilities&Service=wms&version=1.1.1"))
+
 
 # Parse URL tests
-  # MARACOOS NcWMS
-  http://localhost:3000/wms/parse.json?url=http%3A%2F%2Ftds.maracoos.org%2FncWMS%2Fwms%3FSERVICE%3DWMS%26REQUEST%3DGetCapabilities%26VERSION%3D1.1.1
-  # ASA GeoServer
-  http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
-  # ASA ECOP Services
-  http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fservices.asascience.com%2Fecop%2Fwms.aspx%3Frequest%3DGetCapabilities%26service%3Dwms%26version%3D1.1.1
-  # NOAA Nowcoast
-  http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fnowcoast.noaa.gov%2Fwms%2Fcom.esri.wms.Esrimap%2Fwwa%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Ftds.maracoos.org%2FncWMS%2Fwms%3FSERVICE%3DWMS%26REQUEST%3DGetCapabilities%26VERSION%3D1.1.1
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fservices.asascience.com%2Fecop%2Fwms.aspx%3Frequest%3DGetCapabilities%26service%3Dwms%26version%3D1.1.1
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fnowcoast.noaa.gov%2Fwms%2Fcom.esri.wms.Esrimap%2Fwwa%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fcasoilresource.lawr.ucdavis.edu%2Fcgi-bin%2Fmapserv%3Fmap%3D%2Fdata1%2Fwebsite%2Fmapserver%2Fdhtml%2Fmapunit_print.map%26SERVICE%3DWMS%26VERSION%3D1.1.1%26REQUEST%3DGetCapabilities
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fnibis.lbeg.de%2Fnet3%2Fpublic%2Fogc.ashx%3FPkgId%3D24%26Version%3D1.1.1%26Service%3DWMS%26Request%3DGetCapabilities
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fmaps.bgs.ac.uk%2Farcgis%2Fservices%2FSoilPortal%2FSoilPortal%2FMapServer%2FWMSServer%3Fservice%3DWMS%26version%3D1.1.1%26request%3DGetCapabilities%26
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fdemo.mapserver.org%2Fcgi-bin%2Fwms%3FSERVICE%3DWMS%26VERSION%3D1.1.1%26REQUEST%3DGetCapabilities
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fna.unep.net%2Fcgi-bin%2FWind%3Frequest%3Dgetcapabilities%26Service%3Dwms%26version%3D1.1.1
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fciesin.columbia.edu%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1%26request%3DGetCapabilities
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fdisc1.sci.gsfc.nasa.gov%2Fdaac-bin%2Fwms_omi%3Fservice%3Dwms%26version%3D1.1.1%26request%3Dgetcapabilities
 
 
 # Sample extraction

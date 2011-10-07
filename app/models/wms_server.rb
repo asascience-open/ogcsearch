@@ -16,7 +16,6 @@ class WmsServer
   field :contact,         type: String
   field :institution,     type: String
   field :phone,           type: String
-  field :projections,     type: Array     #Strings
   field :map_formats,     type: Array     #Strings
   field :feature_formats, type: Array     #Strings
   field :legend_formats,  type: Array     #Strings
@@ -78,10 +77,6 @@ class WmsServer
 
   def likes_json
     self.likes.as_json(:only => ["up", "down"])
-  end
-
-  def web_mapping_projections
-    WEB_MAPPING_PROJECTIONS & self.projections unless self.projections.nil?
   end
 
   def remove_jobs
