@@ -70,6 +70,7 @@ $ rails console
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fasascience.mine.nu%3A8080%2Fgeoserver%2Fows%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fservices.asascience.com%2Fecop%2Fwms.aspx%3Frequest%3DGetCapabilities%26service%3Dwms%26version%3D1.1.1
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fnowcoast.noaa.gov%2Fwms%2Fcom.esri.wms.Esrimap%2Fwwa%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
+  curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fnowcoast.noaa.gov%2Fwms%2Fcom.esri.wms.Esrimap%2Fobs%3Fservice%3Dwms%26version%3D1.1.1%26request%3DGetCapabilities
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fcasoilresource.lawr.ucdavis.edu%2Fcgi-bin%2Fmapserv%3Fmap%3D%2Fdata1%2Fwebsite%2Fmapserver%2Fdhtml%2Fmapunit_print.map%26SERVICE%3DWMS%26VERSION%3D1.1.1%26REQUEST%3DGetCapabilities
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fnibis.lbeg.de%2Fnet3%2Fpublic%2Fogc.ashx%3FPkgId%3D24%26Version%3D1.1.1%26Service%3DWMS%26Request%3DGetCapabilities
   curl -g http://localhost:3000/wms/parse.json?url=http%3A%2F%2Fmaps.bgs.ac.uk%2Farcgis%2Fservices%2FSoilPortal%2FSoilPortal%2FMapServer%2FWMSServer%3Fservice%3DWMS%26version%3D1.1.1%26request%3DGetCapabilities%26
