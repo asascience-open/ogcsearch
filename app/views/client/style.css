@@ -22,20 +22,6 @@
   font-size: 12px;
 }
 
-#timeSlider {
-  z-index  : 1000;
-  position : absolute;
-  top      : 30px;
-  left     : 60px;
-  width    : 400px;
-  background-image : url('img/semiClearBlue.png');
-  padding : 0px 4px 6px 4px;
-  -moz-border-radius: 8px;
-  border-radius: 8px;
-  border: 1px solid #99BBE8;
-  visibility : hidden;
-}
-
 .search-item {
     font:normal 11px tahoma, arial, helvetica, sans-serif;
     padding:3px 10px 3px 10px;
@@ -124,4 +110,22 @@ div.olControlMousePosition {
 }
 #initAlert td {
   padding : 3;
+}
+
+#sliderTics {
+  padding-left : 36px;
+}
+
+#sliderTicsTable {
+  width : 100%;
+  padding : 0;
+}
+
+#sliderTicsTable td {
+  text-align : center;
+}
+
+.fillSolid {
+  border-left : 1px solid #6F94D2;
+  border-right : 1px solid #6F94D2;
 }

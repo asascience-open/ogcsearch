@@ -21,6 +21,13 @@ var proj3857   = new OpenLayers.Projection("EPSG:3857");
 var dNow = new Date();
 dNow.setMinutes(0);
 dNow.setSeconds(0);
+var dNow12Hours = new Date(dNow.getTime());
+dNow12Hours.setHours(12);
+var numTics = 4; // must be even!
+var availableTimes = [];
+for (var i = -numTics; i <= numTics; i++) {
+  availableTimes.push(new Date(dNow12Hours.getTime() + 12 * i * 60 * 60 * 1000));
+}
 if (dNow.getHours() >= 12) {
   dNow.setHours(12);
 }
@@ -459,9 +466,10 @@ function init() {
     ,constrainHeader : true
     ,html      : '<div id="map"></div><div id="timeSlider"></div></div>'
     ,listeners : {
-      afterrender : function() {
+      afterrender : function(w) {
         initMap();
-        dojo.addOnLoad(initTimeSlider);
+        Ext.getCmp('timeSlider').setWidth(w.getInnerWidth() - 75);
+        Ext.getCmp('sliderTics').setWidth(w.getInnerWidth() - 48);
       }
       ,bodyresize : function(p,w,h) {
         var el = document.getElementById('map');
@@ -469,11 +477,15 @@ function init() {
           el.style.width = w;
           el.style.height = h;
           map.updateSize();
+          Ext.getCmp('timeSlider').setWidth(w - 75);
+          Ext.getCmp('sliderTics').setWidth(w - 48);
         }
       }
     }
     ,tbar      : [
-       'Base layer: '
+       {icon : 'img/blank.png'} // for spacing
+      ,'->'
+      ,'Base layer: '
       ,' '
       ,new Ext.form.ComboBox({
          store          : baseLayersStore
@@ -501,19 +513,85 @@ function init() {
           }
         }
       })
-      ,{icon : 'img/blank.png'} // for spacing
-      ,'->'
-      ,'Show time controls?'
-      ,' '
-      ,new Ext.form.Checkbox({
-         checked    : false
-        ,listeners  : {
-          check : function() {
-            document.getElementById('timeSlider').style.visibility = this.checked ? 'visible' : 'hidden';
-          }
-        }
-      })
     ]
+    ,bbar      : {
+       xtype    : 'container'
+      ,height   : 42
+      ,defaults : {border : false,bodyStyle : 'background:transparent'}
+      ,cls      : 'x-toolbar'
+      ,id      : 'timeSliderContainer'
+      ,items : [
+         new Ext.Panel({
+           width       : 100
+          ,height      : 15
+          ,id          : 'sliderTics'
+          ,html        : '<table id="sliderTicsTable"><tbody></tbody></table>'
+          ,listeners   : {afterrender : function() {
+            var tbody = document.getElementById('sliderTicsTable').getElementsByTagName('tbody')[0];
+            var tr = document.createElement('tr');
+            for (var i = 0; i < availableTimes.length; i++) {
+              var td = document.createElement('td');
+              if (availableTimes[i].getHours() == 0) {
+                td.innerHTML = (availableTimes[i].getMonth() + 1) + '/' + availableTimes[i].getDate();
+                td.style.width = (1 / numTics * 100) + '%';
+                td.style.paddingRight = i;
+              }
+              else {
+                td.innerHTML = '<img src="img/blank.png" width=2>';
+              }
+              if (i == 0 || availableTimes[i].getHours() != 0 || i == availableTimes.length - 1) {
+                td.className = 'fillSolid';
+              }
+              tr.appendChild(td);
+              if (availableTimes[i].getTime() == dNow.getTime()) {
+                Ext.getCmp('timeSlider').setValue(i);
+              }
+            }
+            tbody.appendChild(tr);
+          }}
+        })
+        ,new Ext.Panel({
+           layout       : 'column'
+          ,defaults     : {border : false,bodyStyle : 'background:transparent'}
+          ,items        : [
+            {html : '&nbsp;',width : 5}
+            ,new Ext.Button({
+               icon : 'img/control_rewind_blue.png'
+              ,handler : function() {
+                var slider = Ext.getCmp('timeSlider');
+                slider.setValue(slider.getValue() - 1);
+              }
+            })
+            ,{html : '&nbsp;&nbsp;',width : 5}
+            ,new Ext.Slider({
+               increment   : 1
+              ,minValue    : 0
+              ,maxValue    : availableTimes.length - 1
+              ,width       : 100
+              ,id          : 'timeSlider'
+              ,listeners   : {change : function(slider,val) {
+                var dStr = availableTimes[val].getUTCFullYear() + '-' + String.leftPad(availableTimes[val].getUTCMonth() + 1,2,'0') + '-' + String.leftPad(availableTimes[val].getUTCDate(),2,'0') + 'T' + String.leftPad(availableTimes[val].getUTCHours(),2,'0') + ':00';
+                for (var i = 0; i < map.layers.length; i++) {
+                  // WMS layers only
+                  if (map.layers[i].DEFAULT_PARAMS) {
+                    map.layers[i].mergeNewParams({TIME : dStr});
+                  }
+                }
+              }}
+            })
+            ,{html : '&nbsp;&nbsp;',width : 5}
+            ,new Ext.Button({
+               icon    : 'img/control_fastforward_blue.png'
+              ,handler : function() {
+                var slider = Ext.getCmp('timeSlider');
+                slider.setValue(slider.getValue() + 1);
+              }
+            })
+            ,{html : '&nbsp;',width : 5}
+          ]
+        })
+      ]
+    }
   });
 
   var activeLayersWin = new Ext.Window({
@@ -1053,48 +1131,6 @@ function showLayerSettings(name) {
       }}
     }).show();
   }
-}
-
-function initTimeSlider() {
-  var timeSlider = new esri.dijit.TimeSlider({"class" : "claro"},dojo.byId("timeSlider"));
-  var play = document.getElementById('timeSlider').getElementsByTagName('tbody')[0].getElementsByTagName('td')[0];
-  play.parentNode.removeChild(play);
-  document.getElementById('timeSlider').style.width = '350px';
-  var timeExtent = new esri.TimeExtent();
-  timeExtent.startTime = new Date(dNow.getTime() - 2 * 24 * 60 * 60 * 1000);
-  timeExtent.endTime   = new Date(dNow.getTime() + 2 * 24 * 60 * 60 * 1000);
-  timeSlider.createTimeStopsByTimeInterval(timeExtent,12,'esriTimeUnitsHours');
-  timeSlider.setThumbMovingRate(2000);
-  timeSlider.singleThumbAsTimeInstant(true);
-  timeSlider.startup();
-  var i = 0;
-  for (var d = new Date(timeExtent.startTime.getTime()); d < new Date(timeExtent.endTime.getTime()); d = new Date(d.getTime() + 12 * 60 * 60 * 1000)) {
-    if (dNow.getTime() == d.getTime()) {
-      timeSlider.setThumbIndexes([i]);
-    }
-    i++;
-  }
-  // timeSlider.setThumbIndexes([(timeSlider.timeStops.length - 1) / 2]);
-  var labels = [];
-  for (var i = 0; i < timeSlider.timeStops.length; i++) {
-    if (i % 2 == 0) {
-      labels.push(String.leftPad((timeSlider.timeStops[i].getMonth() + 1),2,'0') + '/' + String.leftPad(timeSlider.timeStops[i].getDate(),2,'0'));
-    }
-    else {
-      labels.push('');
-    }
-  }
-  timeSlider.setLabels(labels);
-  dojo.connect(timeSlider,"onTimeExtentChange",function(timeExtent) {
-    var endValString = timeExtent.endTime.getUTCFullYear() + '-' + String.leftPad(timeExtent.endTime.getUTCMonth() + 1,2,'0') + '-' + String.leftPad(timeExtent.endTime.getUTCDate(),2,'0') + 'T' + String.leftPad(timeExtent.endTime.getUTCHours(),2,'0') + ':00';
-    dNow = timeExtent.endTime;
-    for (var i = 0; i < map.layers.length; i++) {
-      // WMS layers only
-      if (map.layers[i].DEFAULT_PARAMS && !map.layers[i].isBaseLayer && map.layers[i].name != 'ESRI Ocean (EPSG:900913)') {
-        map.layers[i].mergeNewParams({TIME : endValString});
-      }
-    }
-  });
 }
 
 function addWMS(id) {
