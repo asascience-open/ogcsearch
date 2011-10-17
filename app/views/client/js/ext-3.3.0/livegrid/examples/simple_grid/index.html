@@ -1,0 +1,94 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="ltr" lang="en-US">
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+
+<title>Ext.ux.Livegrid &raquo; Simple Grid Example</title>
+
+
+<link rel="stylesheet" type="text/css" href="http://www.sencha.com/deploy/dev/resources/css/ext-all.css"/>
+
+
+<link rel="stylesheet" type="text/css" href="../../build/resources/css/ext-ux-livegrid.css" />
+
+
+
+</head>
+
+<body>
+
+
+<div id="content_1" style="margin:100px"></div>
+
+
+    <script type="text/javascript" src="http://www.sencha.com/deploy/dev/adapter/ext/ext-base.js"></script>
+    <script type="text/javascript" src="http://www.sencha.com/deploy/dev/ext-all.js"></script>
+
+<script type="text/javascript" src="../../build/livegrid-all-debug.js"></script>
+
+
+<script type="text/javascript">
+
+
+Ext.onReady(function() {
+
+
+
+    var myView = new Ext.ux.grid.livegrid.GridView({
+        nearLimit : 100,
+        loadMask  : {
+            msg :  'Buffering. Please wait...'
+        }
+    });
+
+    var livegrid = new Ext.ux.grid.livegrid.GridPanel({
+        enableDragDrop : false,
+        cm             : new Ext.grid.ColumnModel([
+            new Ext.grid.RowNumberer({header : '#' }),
+            {header: "Number", align : 'left',   width: 160, sortable: true, dataIndex: 'number'},
+            {header: "String", align : 'left',   width: 160, sortable: true, dataIndex: 'text'},
+            {header: "Date",   align : 'right',  width: 160, sortable: true, dataIndex: 'date'}
+        ]),
+        loadMask       : {
+            msg : 'Loading...'
+        },
+        title      : 'Large table',
+        height     : 400,
+        stripeRows : true,
+        width      : 600,
+        store      : new Ext.ux.grid.livegrid.Store({
+            autoLoad : true,
+            url      : './server.php',
+            bufferSize : 300,
+            reader     : new Ext.ux.grid.livegrid.JsonReader({
+                root            : 'data',
+                versionProperty : 'version',
+                totalProperty   : 'totalCount',
+                id              : 'id'
+              }, [ {
+                 name : 'number', sortType : 'int'
+              },{
+                 name : 'text', sortType : 'string'
+              },{
+                 name : 'date',   sortType : 'int'
+            }]),
+            sortInfo   : {field: 'number', direction: 'ASC'}
+        }),
+        selModel : new Ext.ux.grid.livegrid.RowSelectionModel(),
+        view     : myView,
+        bbar     : new Ext.ux.grid.livegrid.Toolbar({
+            view        : myView,
+            displayInfo : true
+        })
+    });
+
+    livegrid.render('content_1');
+});
+
+</script>
+
+
+</body>
+
+</html>
