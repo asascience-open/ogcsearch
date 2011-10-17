@@ -1,4 +1,4 @@
-Ogcsearch::Application.routes.draw do
+OgcSearch::Application.routes.draw do
 
   namespace :admin do
     resources :wms, :only => [:index, :destroy] do
@@ -14,6 +14,10 @@ Ogcsearch::Application.routes.draw do
   match 'wms/status.:format' => 'wms#status'
   match 'wms/search.:format' => 'wms#search'
   match 'wms/extract.:format' => 'wms#extract'
+
+  match 'client' => 'client#index'
+
+  match 'proxy' => 'client#proxy', :via => [:get, :post]
 
   root :to => "client#index"
 
