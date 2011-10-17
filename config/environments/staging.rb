@@ -47,8 +47,7 @@ OgcSearch::Application.configure do
 
   # Disable delivery errors, bad email addresses will be ignored
   # config.action_mailer.raise_delivery_errors = false
-  config.action_mailer.default_url_options = { :host => 'http://ogc-staging.herokuapp.com' }
-
+  config.action_mailer.default_url_options = { :host => 'ogc-staging.herokuapp.com' }
 
   # Enable threaded mode
   # config.threadsafe!
