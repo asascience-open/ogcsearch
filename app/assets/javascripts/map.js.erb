@@ -692,7 +692,7 @@ function initMap() {
   // set transformation functions from/to alias projection
   OpenLayers.Projection.addTransform("EPSG:4326","EPSG:3857",OpenLayers.Layer.SphericalMercator.projectForward);
   OpenLayers.Projection.addTransform("EPSG:3857","EPSG:4326",OpenLayers.Layer.SphericalMercator.projectInverse);
-
+  OpenLayers.Util.ImgPath = "/assets/";
   OpenLayers.Util.onImageLoadError = function() {this.src = '<%= asset_path 'blank.png' %>';}
 
   map = new OpenLayers.Map('map',{
