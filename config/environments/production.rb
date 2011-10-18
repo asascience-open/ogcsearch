@@ -61,3 +61,5 @@ OgcSearch::Application.configure do
   # Send deprecation notices to registered listeners
   config.active_support.deprecation = :notify
 end
+
+HOSTNAME="http://ogc-production.herokuapp.com"
