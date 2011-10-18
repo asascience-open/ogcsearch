@@ -1,5 +1,6 @@
 /*
  *= require_self
  *= require ext-all
- *= require style
+ *= require mapstyle
+ *= require_tree ../../../vendor/assets/javascripts/
 */
