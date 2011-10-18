@@ -15,7 +15,7 @@ class ClientController < ApplicationController
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true if uri.class == URI::HTTPS
       data = http.request(Net::HTTP::Get.new(uri.request_uri))
-      @resp = JSON.decode(CGI::unescape(data.body))
+      @resp = ActiveSupport::JSON.decode(CGI::unescape(data.body))
     else
       @resp = {"status" => "Bad URL"}
     end
