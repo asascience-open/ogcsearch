@@ -18,7 +18,7 @@ var proj4326   = new OpenLayers.Projection("EPSG:4326");
 var proj900913 = new OpenLayers.Projection("EPSG:900913");
 var proj3857   = new OpenLayers.Projection("EPSG:3857");
 
-var hostname = '<%= HOSTNAME %>';
+var hostname = '<%= ENV["HOSTNAME"] || HOSTNAME %>';
 
 var dNow = new Date();
 dNow.setMinutes(0);
