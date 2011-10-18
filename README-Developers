@@ -8,42 +8,36 @@ $ gem install bundler --no-ri --no-rdoc
 $ bundle install
 
 
-# Start development
-# Start Solr
-$ rake sunspot:solr:start
-
 # Start the job runner
 $ rake jobs:work
 
-# Start the webserver
-$ rails server thin
+# Start the webserver. Unicorn is faster and is what Production uses.
+$ rails server
+OR
+# unicorn -p 3000 -c ./config/unicorn.rb
 
 # Go to the homepage root
 $ firefox http://localhost:3000/
 
 
-# Set admin password:
+# Change the admin password (shouldn't have to do this)
 heroku config:add WEB_ADMIN_PASSWORD=xxxxx
-
-# FAQ
-1.) Connection refused - connect(2)
-A - Start the Solr server: rake sunsport:solr:start
 
 
 
 # Maintenence
 
-# Reindex Solr:
-$ rake sunspot:reindex
-
 # Setup in Heroku
 $ heroku create ogc-staging --stack cedar --remote ogc-staging
 $ heroku addons:add mongolab:starter --app ogc-staging
+$ heroku addons:add memcache --app ogc-staging
 $ heroku config --app ogc-staging | grep MONGOLAB_URI
     MONGOLAB_URI => mongodb://heroku_app736601:qjf170a5afe67ccjb85gq2u5n6@dbh29.mongolab.com:27297/heroku_app736601
     # Paste the result (above) so:
     production:
       uri: mongodb://heroku_app736601:qjf170a5afe67ccjb85gq2u5n6@dbh29.mongolab.com:27297/heroku_app736601
+
+$ heroku config:add WEB_ADMIN_PASSWORD=xxxxx
 
 
 # Reinit voting:
