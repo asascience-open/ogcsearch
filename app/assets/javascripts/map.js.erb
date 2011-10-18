@@ -18,7 +18,7 @@ var proj4326   = new OpenLayers.Projection("EPSG:4326");
 var proj900913 = new OpenLayers.Projection("EPSG:900913");
 var proj3857   = new OpenLayers.Projection("EPSG:3857");
 
-var hostname = '<%= ENV["HOSTNAME"] || HOSTNAME %>';
+var hostname = document.location.protocol + "//" + document.location.host;
 
 var dNow = new Date();
 dNow.setMinutes(0);
@@ -878,7 +878,7 @@ function renderLayerVisibility(val,metadata,rec) {
   }
   else {
     metadata.attr = 'ext:qtip="Turn layer ' + val + '"';
-    return '<a href="javascript:toggleLayerVisibility(\'' + rec.get('name') + '\')"><img src="assets/wms.' + val + '.png" width=16 height=16></a>';
+    return '<a href="javascript:toggleLayerVisibility(\'' + rec.get('name') + '\')"><img src="/assets/wms.' + val + '.png" width=16 height=16></a>';
   }
 }
 

@@ -33,5 +33,3 @@ OgcSearch::Application.configure do
 
   #config.threadsafe!
 end
-
-HOSTNAME="http://localhost:3000"

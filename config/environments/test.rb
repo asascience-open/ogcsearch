@@ -40,5 +40,3 @@ OgcSearch::Application.configure do
   # Print deprecation notices to the stderr
   config.active_support.deprecation = :stderr
 end
-
-HOSTNAME="http://localhost:3000"
