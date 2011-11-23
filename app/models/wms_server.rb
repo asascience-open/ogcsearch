@@ -59,12 +59,12 @@ class WmsServer
     URI.unescape(url)
   end
 
-  def parse
+  def parse(t=Time.now.utc)
     pw = ParseWms.new(self.id)
     pw.job_data = self.id.to_s
     # Only one "pending" parse job at a time please
     Job.pending.where(job_type: ParseWms.to_s, job_data: self.id.to_s).destroy_all
-    Delayed::Job.enqueue(pw)
+    Delayed::Job.enqueue(pw,0,t)
   end
 
   def locked?

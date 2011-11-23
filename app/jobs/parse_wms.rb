@@ -201,12 +201,17 @@ class ParseWms < GlobalJob
     if version == "1.1.1"
       # WMS 1.1.1
       parse_111(server, doc)
+      server.parse(1.day.from_now.utc)
+      return true
     elsif version == "1.3.0"
       # WMS 1.3.0
       parse_130(server, doc)
+      server.parse(1.day.from_now.utc)
+      return true
     else
       server.status = "WMS server version is not compatible (1.1.1 and 1.3.0 supported).  Found: '#{version}'."
       server.save!
+      server.parse(1.day.from_now.utc)
       return false
     end
   end
