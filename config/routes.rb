@@ -9,6 +9,8 @@ OgcSearch::Application.routes.draw do
     end
   end
 
+  resources :extract, :only => [:index]
+
   match 'wms/find.:format' => 'wms#find'
   match 'wms/parse' => 'wms#parse'
   match 'wms/status.:format' => 'wms#status'

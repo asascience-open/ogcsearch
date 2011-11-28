@@ -51,6 +51,16 @@ class WmsServer
     write_attribute(:url, URI.unescape(_url))
   end
 
+  def self.extract(url, data)
+    # data =  open(@url).read
+    data.scan(/[a-zA-Z0-9\&=?\.\/:]+request=getcapabilities[a-zA-Z0-9\&=?]*(?:\.[0-9])*/i).map do |k|
+      if /service=wms/i =~ k
+        # Normalize into a URI. This handles relative links (if needed)
+        URI::join(url,k).to_s.gsub(/([^:])\/\//, '\1/') rescue nil
+      end
+    end.compact
+  end
+
   # Provides normalization and validation of URLs in and out of the database
   def self.normalize_url(url)
     return nil if url.nil? || url.blank?

@@ -70,27 +70,7 @@ class WmsController < ApplicationController
   def extract
     file = open(@fixed_url)
     r = file.read
-    
-    scan_hrefs = r.scan(/[a-zA-Z0-9\&=?\.\/:]+request=getcapabilities[a-zA-Z0-9\&=?]*(?:\.[0-9])*/i).map do |k|
-      if /service=wms/i =~ k
-        # Normalize into a URI. This handles relative links (if needed)
-        URI::join(@fixed_url,k).to_s.gsub(/([^:])\/\//, '\1/') rescue nil
-      end
-    end.compact
-
-    link_hrefs = []
-
-    # This isn't actually pulling out any additional information, is it?!?!
-    #doc = Nokogiri::HTML(r)
-    #link_hrefs = doc.xpath("//a/@href").map do |s|
-    #  if /service=wms/i =~ s.text && /request=getcapabilities/i =~ s.text
-    #    # Normalize into a URI. This handles relative links!
-    #    URI::join(@fixed_url,s.text).to_s.gsub(/([^:])\/\//, '\1/') rescue nil
-    #  end
-    #end.compact
-
-    hrefs = (link_hrefs + scan_hrefs).uniq
-
+    hrefs = WmsServer.extract(@fixed_url, r).uniq
     respond_to do |format|
       format.json { render :json => hrefs }
     end
