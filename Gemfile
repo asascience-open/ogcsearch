@@ -46,4 +46,5 @@ gem 'kaminari'
 
 # Application
 gem 'nokogiri'
-gem 'rgeo' # Requires the 'proj-devel' and 'geos-devel' packages
+gem 'rgeo' # Requires 'proj-devel' and 'geos-devel' 
+gem 'rgeo-geojson'
