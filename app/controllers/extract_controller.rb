@@ -15,7 +15,6 @@ class ExtractController < ApplicationController
         {:wms => wms_hrefs, :kml => kml_hrefs}
       }
     end
-
   end
 
 end

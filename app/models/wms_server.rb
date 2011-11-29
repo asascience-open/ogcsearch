@@ -74,19 +74,19 @@ class WmsServer
     pw.job_data = self.id.to_s
     # Only one "pending" parse job at a time please
     Job.pending.where(job_type: ParseWms.to_s, job_data: self.id.to_s).destroy_all
-    Delayed::Job.enqueue(pw,0,t)
+    Delayed::Job.enqueue(pw, :run_at => t)
   end
 
   def locked?
     !Job.locked.where(job_type: ParseWms.to_s, job_data: self.id.to_s).empty?
   end
 
-  def DT_RowId
-    self.id.to_s
-  end
-
   def pending?
     !Job.pending.where(job_type: ParseWms.to_s, job_data: self.id.to_s).empty?
+  end
+
+  def DT_RowId
+    self.id.to_s
   end
 
   def likes_json

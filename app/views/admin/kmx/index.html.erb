@@ -1,0 +1,67 @@
+<table id="kmx_servers"></table>
+
+<script type="text/javascript">
+
+  function makeActionButtons(oObj) {
+    var text = "";
+    text += "<a href='#' class='destroyer' name='" + oObj.aData.DT_RowId + "'>Delete</a> ";
+    text += "<a href='#' class='parser' name='" + oObj.aData.url + "'>Parse</a> ";
+    return text;
+  }
+
+  var oTable;
+
+  $(document).ready(function() {
+
+	  /* Init DataTables */
+	  oTable = $('#kmx_servers').dataTable( {
+  	  "bJQueryUI": true,
+	    "bProcessing": true,
+	    "bServerSide": true,
+	    "bDeferRender": true,
+	    "sPaginationType": "full_numbers",
+      "sAjaxSource": "/admin/kmx/populate.dataTable",
+      "aoColumns": [
+        { "sTitle": "Name", "sName": "name", "mDataProp": "name" },
+        { "sTitle": "URL", "sName": "url", "mDataProp": "url" },
+        { "sTitle": "Keywords", "sName": "keywords", "mDataProp": "keywords" },
+        { "sTitle": "Tags", "sName": "tags", "mDataProp": "tags" },
+        { "sTitle": "Last Scanned", "sName": "scanned", "mDataProp": "scanned" },
+        { "sTitle": "Actions", "sName": "action", "mDataProp": null, "fnRender": function (oObj){ return makeActionButtons(oObj); } }
+      ],
+      "fnDrawCallback": function(oSettings, json) {
+        $(".destroyer").click(function(e) {
+          e.preventDefault();
+          var id = $(e.target).attr('name');
+          $.ajax({
+            type: "DELETE",
+            url: "/admin/kmx/"+id+".json",
+            success: function(){
+              var tr = $("#"+id);
+              oTable.fnDraw();
+            },
+            error: function(){
+              alert('Failed to delete Kmx');
+            }
+          });
+        });
+        $(".parser").click(function(e) {
+          e.preventDefault();
+          var url = encodeURIComponent($(e.target).attr('name'));
+          $.ajax({
+            type: "GET",
+            url: "/kmx/parse.json",
+            data: "force=true&url="+url,
+            success: function(){
+              var tr = $("#"+url);
+              oTable.fnDraw();
+            },
+            error: function(){
+              alert('Failed to parse Kmx');
+            }
+          });
+        });
+      }
+	  });
+  });
+</script>
