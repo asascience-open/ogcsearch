@@ -6,7 +6,7 @@ gem 'rake'
 # Database
 gem 'bson'
 gem 'bson_ext'
-gem 'mongo'
+gem 'mongo', '1.4.0'
 gem 'mongoid'
 gem 'mongoid_spacial'
 # This fork supports embedded document voting
