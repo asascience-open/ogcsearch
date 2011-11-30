@@ -14,7 +14,8 @@ gem 'voteable_mongo', :git => 'http://github.com/angelim/voteable_mongo.git'
 
 # DJ
 gem 'delayed_job', '2.1.4'
-gem 'delayed_job_mongoid', '1.0.4'
+# There was a nil bug when running with Mongo 2.0+, fixed in a commit, but not released
+gem 'delayed_job_mongoid', :git => "http://github.com/collectiveidea/delayed_job_mongoid", :ref => "77fa22a7ad"
 
 # Searching
 # https://github.com/aaw/mongoid_fulltext
@@ -46,5 +47,5 @@ gem 'kaminari'
 
 # Application
 gem 'nokogiri'
-gem 'rgeo' # Requires 'proj-devel' and 'geos-devel' 
+gem 'rgeo' # Requires 'proj-devel' and 'geos-devel'
 gem 'rgeo-geojson'
