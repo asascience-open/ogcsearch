@@ -75,6 +75,7 @@ function init() {
       return;
     }
     var json  = new OpenLayers.Format.JSON().read(r.responseText);
+    json = json.wms;
     var table = document.createElement('table');
     var tbody = document.createElement('tbody');
     for (var i = 0; i < json.length; i++ ) {
@@ -154,13 +155,8 @@ function init() {
         Ext.getCmp('googleSearchPanel').getEl().unmask();
         sto.each(function(rec) {
           OpenLayers.Request.issue({
-             method   : 'POST'
-            ,url      : '/proxy'
-            ,headers  : {'Content-Type' : 'application/x-www-form-urlencoded'}
-            ,data     : OpenLayers.Util.getParameterString({
-              u : hostname + '/wms/extract.json'
-                + '?url=' + rec.get('link')
-            })
+             method   : 'GET'
+            ,url      : '/extract.json' + '?url=' + encodeURIComponent(rec.get('link'))
             ,callback : OpenLayers.Function.bind(extractCallback,null,rec.get('link'))
           });
         });
@@ -170,8 +166,10 @@ function init() {
 
   var cacheSearchPageLimit = 10;
   cacheSearchStore = new Ext.data.JsonStore({
-     method        : 'POST'
-    ,url           : '/proxy'
+    proxy          : new Ext.data.HttpProxy({
+       url    : '/wms/search.json'
+      ,method : 'GET'
+    })
     ,root          : 'data'
     ,totalProperty : 'records'
     ,idProperty    : '_id'
@@ -196,10 +194,8 @@ function init() {
       ,beforeload : function(sto) {
         Ext.getCmp('cacheSearchPanel').getEl().mask();
         sto.removeAll();
-        sto.setBaseParam('u', hostname + '/wms/search.json'
-          + '?terms=' + googleSearchStore.baseParams.query
-          + '&page=' + cacheSearchStore.baseParams.page
-        );
+        sto.setBaseParam('terms',googleSearchStore.baseParams.query);
+        sto.setBaseParam('page',cacheSearchStore.baseParams.page);
       }
       ,load : function(sto) {
         Ext.getCmp('cacheSearchPanel').getEl().unmask();
@@ -833,14 +829,10 @@ function getCaps(u) {
   if (!getCapsLinks[u]) {
     // register the url in the cache
     OpenLayers.Request.issue({
-       method  : 'POST'
-      ,url     : '/proxy'
-      ,headers : {'Content-Type' : 'application/x-www-form-urlencoded'}
-      ,data    : OpenLayers.Util.getParameterString({
-        u : hostname + '/wms/parse.json'
-          + '?url=' + encodeURIComponent(u)
-          + '&terms=' + Ext.getCmp('searchField').getValue()
-      })
+       method  : 'GET'
+      ,url     : '/wms/parse.json'
+        + '?url=' + encodeURIComponent(u)
+        + '&terms=' + Ext.getCmp('searchField').getValue()
       ,callback : function(r) {
         // log activity
         var json = new OpenLayers.Format.JSON().read(r.responseText);
@@ -1274,13 +1266,8 @@ function checkGetCapsStatus() {
   for (var u in getCapsLinks) {
     if (!getCapsLinks[u]) {
       OpenLayers.Request.issue({
-         method   : 'POST'
-        ,url      : '/proxy'
-        ,headers  : {'Content-Type' : 'application/x-www-form-urlencoded'}
-        ,data     : OpenLayers.Util.getParameterString({
-          u : hostname + '/wms/status.json'
-            + '?url=' + encodeURIComponent(u)
-        })
+         method   : 'GET'
+        ,url      : '/wms/status.json' + '?url=' + encodeURIComponent(u)
         ,callback : OpenLayers.Function.bind(statusCallback,null,u)
       });
     }
@@ -1374,7 +1361,10 @@ function parseGetCapsFromCache(u) {
          border  : false
         ,id      : 'getCapsGridPanel'
         ,store   : new Ext.data.JsonStore({
-           url        : '/proxy'
+          proxy       : new Ext.data.HttpProxy({
+             url    : '/wms/find.json'
+            ,method : 'GET'
+          })
           ,root       : 'wms_layers'
           ,sortInfo   : {
              field     : 'title'
@@ -1393,7 +1383,7 @@ function parseGetCapsFromCache(u) {
           ]
           ,autoLoad   : true
           ,listeners  : {beforeload : function(sto) {
-            sto.setBaseParam('u', hostname + '/wms/find.json' + '?url=' + encodeURIComponent(u));
+            sto.setBaseParam('url',u);
           }}
         })
         ,columns : [
