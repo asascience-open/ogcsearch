@@ -17,7 +17,7 @@ class ClientController < ApplicationController
       data = http.request(Net::HTTP::Get.new(uri.request_uri))
       headers["Content-Type"] = data.content_type || "text/plain"
       @resp = data.body
-      @resp = ActiveSupport::JSON.decode(CGI.unescape(@resp)) if headers["Content-Type"] == "application/json" || headers["Content-Type"] == "text/json"
+      @resp = ActiveSupport::JSON.decode(@resp) if headers["Content-Type"] == "application/json" || headers["Content-Type"] == "text/json"
     else
       headers["Content-Type"] = "application/json"
       @resp = {"status" => "Bad URL"}
