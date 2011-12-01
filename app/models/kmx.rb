@@ -41,12 +41,19 @@ class Kmx
     write_attribute(:url, URI.unescape(_url))
   end
 
-	def self.extract(url, data)
-    # data =  open(@url).read
-    data.scan(/([a-zA-Z0-9_\-\.\/:]+\.km[lz]{1})[\W]/i).map do |k|
-      # Normalize into a URI. This handles relative links (if needed)
-      URI::join(url,k.first).to_s.gsub(/([^:])\/\//, '\1/') rescue nil
-    end.compact
+  def self.extract(url, data, doc)
+    scan_hrefs = URI.extract(data).map do |m|
+      if m =~ KMX_LINK_REGEX
+        CGI.unescapeHTML(m) rescue nil
+      end
+    end
+    link_hrefs = doc.xpath("//a/@href").map do |s|
+      if s.text =~ KMX_LINK_REGEX
+        # Normalize into a URI. This handles relative links!
+        URI::join(url,s.text).to_s.gsub(/([^:])\/\//, '\1/') rescue nil
+      end
+    end
+    (scan_hrefs + link_hrefs).compact.uniq
   end
 
   def parse(t=Time.now.utc)

@@ -51,14 +51,19 @@ class WmsServer
     write_attribute(:url, URI.unescape(_url))
   end
 
-  def self.extract(url, data)
-    # data =  open(@url).read
-    data.scan(/[a-zA-Z0-9\&=?\.\/:]+request=getcapabilities[a-zA-Z0-9\&=?]*(?:\.[0-9])*/i).map do |k|
-      if /service=wms/i =~ k
-        # Normalize into a URI. This handles relative links (if needed)
-        URI::join(url,k).to_s.gsub(/([^:])\/\//, '\1/') rescue nil
+  def self.extract(url, data, doc)
+    scan_hrefs = URI.extract(data).map do |m|
+      if m =~ GETCAP_REGEX && m =~ WMS_SERVICE_REGEX
+        CGI.unescapeHTML(m) rescue nil
       end
-    end.compact
+    end
+    link_hrefs = doc.xpath("//a/@href").map do |s|
+      if s.text =~ GETCAP_REGEX && s.text =~ WMS_SERVICE_REGEX
+        # Normalize into a URI. This handles relative links!
+        URI::join(url,s.text).to_s.gsub(/([^:])\/\//, '\1/') rescue nil
+      end
+    end
+    (scan_hrefs + link_hrefs).compact.uniq
   end
 
   # Provides normalization and validation of URLs in and out of the database

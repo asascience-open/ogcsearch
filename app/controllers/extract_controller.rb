@@ -7,12 +7,14 @@ class ExtractController < ApplicationController
   def index
     file = open(@fixed_url)
     r = file.read
-    wms_hrefs = WmsServer.extract(@fixed_url, r).uniq
-    kml_hrefs = Kmx.extract(@fixed_url, r).uniq
+    doc = Nokogiri::HTML(r)
+
+    wms_hrefs = WmsServer.extract(@fixed_url,r,doc)
+    kmx_hrefs = Kmx.extract(@fixed_url,r,doc)
 
     respond_to do |format|
       format.json { render :json => 
-        {:wms => wms_hrefs, :kml => kml_hrefs}
+        {:wms => wms_hrefs, :kmx => kmx_hrefs}
       }
     end
   end
