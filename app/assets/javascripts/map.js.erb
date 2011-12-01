@@ -201,7 +201,9 @@ function init() {
         activityStore.insert(0,new activityStore.recordType({
            i        : activityStore.getCount()
           ,type     : 'search.json'
-          ,request  : sto.baseParams.u
+          ,request  : '/wms/search.json'
+            + '?terms=' + sto.baseParams.terms 
+            + '&page' + sto.baseParams.page
           ,response : 'n/a'
         }));
         checkGetCapsStatus();
