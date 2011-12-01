@@ -18,8 +18,6 @@ var proj4326   = new OpenLayers.Projection("EPSG:4326");
 var proj900913 = new OpenLayers.Projection("EPSG:900913");
 var proj3857   = new OpenLayers.Projection("EPSG:3857");
 
-var hostname = document.location.protocol + "//" + document.location.host;
-
 var dNow = new Date();
 dNow.setMinutes(0);
 dNow.setSeconds(0);
@@ -63,7 +61,7 @@ function init() {
     activityStore.insert(0,new activityStore.recordType({
        i        : activityStore.getCount()
       ,type     : 'extract.json'
-      ,request  : hostname + '/wms/extract.json'
+      ,request  : '/extract.json'
         + '?url=' + encodeURIComponent(u)
       ,response : r.responseText == '' ? 'ERROR' : 'OK'
     }));
@@ -207,7 +205,6 @@ function init() {
           ,response : 'n/a'
         }));
         checkGetCapsStatus();
-        checkGetCapsStatusTimer = setTimeout('checkGetCapsStatus()',10000);
       }
     }
   });
@@ -318,15 +315,6 @@ function init() {
             ,allowDepressed : true
             ,enableToggle   : true
             ,pressed        : true
-            ,handler        : function(but) {
-              if (but.pressed) {
-                checkGetCapsStatus();
-                checkGetCapsStatusTimer = setTimeout('checkGetCapsStatus()',10000);
-              }
-              else {
-                clearTimeout(checkGetCapsStatusTimer);
-              }
-            }
           }
           ,{
              text           : 'Activity log'
@@ -839,7 +827,7 @@ function getCaps(u) {
         activityStore.insert(0,new activityStore.recordType({
            i        : activityStore.getCount()
           ,type     : 'parse.json'
-          ,request  : hostname + '/wms/parse.json'
+          ,request  : '/wms/parse.json'
             + '?url=' + encodeURIComponent(u)
             + '&terms=' + Ext.getCmp('searchField').getValue()
           ,response : json.status
@@ -1217,6 +1205,7 @@ function addDemoLyrs() {
 }
 
 function checkGetCapsStatus() {
+  checkGetCapsStatusTimer = setTimeout('checkGetCapsStatus()',10000);
   if (Ext.getCmp('autoSyncButton') && !Ext.getCmp('autoSyncButton').pressed) {
     return;
   }
@@ -1255,7 +1244,7 @@ function checkGetCapsStatus() {
     activityStore.insert(0,new activityStore.recordType({
        i        : activityStore.getCount()
       ,type     : 'status.json'
-      ,request  : hostname + '/wms/status.json'
+      ,request  : '/wms/status.json'
         + '?url=' + encodeURIComponent(u)
       ,response : json.status
     }));
@@ -1343,7 +1332,7 @@ function parseGetCapsFromCache(u) {
   activityStore.insert(0,new activityStore.recordType({
      i        : activityStore.getCount()
     ,type     : 'find.json'
-    ,request  : hostname + '/wms/find.json' + '?url=' + encodeURIComponent(u)
+    ,request  : '/wms/find.json' + '?url=' + encodeURIComponent(u)
     ,response : 'n/a'
   }));
 
