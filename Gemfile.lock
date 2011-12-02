@@ -184,6 +184,7 @@ DEPENDENCIES
   rake
   rgeo
   rgeo-geojson
+  rubyzip
   sass-rails (~> 3.1.4)
   turn
   uglifier (>= 1.0.3)

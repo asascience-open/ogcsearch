@@ -1,5 +1,6 @@
 require 'open-uri'
 require 'rgeo/geo_json'
+require 'zip/zip'
 
 class ParseKmx < GlobalJob
 
@@ -9,7 +10,29 @@ class ParseKmx < GlobalJob
 
   def perform
     server = Kmx.find(@kmx_id)
-    doc = Nokogiri::XML(open(server.url))
+
+    doc = nil
+    if server.isKmz?
+      # KMZ files can only have 1 KML file in them.  See:
+      # http://code.google.com/apis/kml/documentation/kmzarchives.html
+
+      # Download the KMZ and extract the KML files from it.
+      file = Tempfile.new("temp.kmz")
+      file.binmode
+      open(server.url) { |data| file.write data.read }
+      file.close
+
+      Zip::ZipFile::foreach(file.path) do |zip|
+        if zip.to_s =~ KML_LINK_REGEX
+          doc = Nokogiri::XML(zip.get_input_stream.read)
+          break
+        end
+      end
+      file.unlink
+    else
+      doc = Nokogiri::XML(open(server.url))
+    end
+
     doc.remove_namespaces!
 
     server.name = doc.xpath("/kml/Document/name | /kml/Folder/name | /kml/Document/Folder/name").first.text.strip rescue nil

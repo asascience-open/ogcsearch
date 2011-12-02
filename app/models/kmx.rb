@@ -84,4 +84,8 @@ class Kmx
     Job.where(type: "ParseKmx", data: self.id.to_s).destroy_all
   end
 
+  def isKmz?
+    url =~ KMZ_LINK_REGEX
+  end
+
 end
