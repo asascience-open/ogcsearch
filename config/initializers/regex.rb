@@ -3,4 +3,6 @@ KMX_URL_REGEX=/([a-zA-Z0-9_\-\.\/:]+\.km[lz]{1})[\W]/i
 
 GETCAP_REGEX = /request=getcapabilities/i
 WMS_SERVICE_REGEX = /service=wms/i
-KMX_LINK_REGEX = /\.km[lz]{1}/
+KMX_LINK_REGEX = /\.km[lz]{1}/i
+KML_LINK_REGEX = /\.kml/i
+KMZ_LINK_REGEX = /\.kmz/i
