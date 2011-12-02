@@ -73,33 +73,66 @@ function init() {
       return;
     }
     var json  = new OpenLayers.Format.JSON().read(r.responseText);
-    json = json.wms;
+
     var table = document.createElement('table');
     var tbody = document.createElement('tbody');
-    for (var i = 0; i < json.length; i++ ) {
-      if (!getCapsLinks[json[i]]) {
-        getCapsLinks[json[i]] = false;
+    for (var i = 0; i < json.wms.length; i++ ) {
+      if (!getCapsLinks[json.wms[i]]) {
+        getCapsLinks[json.wms[i]] = false;
       }
       var tr = document.createElement('tr');
       var td = document.createElement('td');
       var a = document.createElement('a');
-      a.href = 'javascript:getCaps("' + json[i] + '")';
+      a.href = 'javascript:getCaps("' + json.wms[i] + '")';
       var img = new Image();
       img.src = '<%= asset_path 'folder.png' %>';
       img.title = 'View all layers from this set';
-      img.name = json[i];
+      img.name = json.wms[i];
       if (document.all) {
         // stupid IE
-        img = document.createElement("<img src='<%= asset_path 'folder.png' %>' title='View all layers from this set' name='" + json[i] + "'>");
+        img = document.createElement("<img src='<%= asset_path 'folder.png' %>' title='View all layers from this set' name='" + json.wms[i] + "'>");
       }
       a.appendChild(img);
       td.appendChild(a);
       tr.appendChild(td);
       td = document.createElement('td');
       a = document.createElement('a');
-      a.href = 'javascript:getCaps("' + json[i] + '")';
-      a.innerHTML = json[i].length > 50 ? json[i].substr(0,50) + '...' : json[i];
+      a.href = 'javascript:getCaps("' + json.wms[i] + '")';
+      a.innerHTML = json.wms[i].length > 50 ? json.wms[i].substr(0,50) + '...' : json.wms[i];
       a.title = 'View all layers from this set';
+      td.appendChild(a);
+      tr.appendChild(td);
+      tbody.appendChild(tr);
+    }
+    table.appendChild(tbody);
+    el.appendChild(table);
+
+    table = document.createElement('table');
+    tbody = document.createElement('tbody');
+    for (var i = 0; i < json.kmx.length; i++ ) {
+      if (!getCapsLinks[json.kmx[i]]) {
+        getCapsLinks[json.kmx[i]] = false;
+      }
+      var tr = document.createElement('tr');
+      var td = document.createElement('td');
+      var a = document.createElement('a');
+      a.href = 'javascript:getKmx("' + json.kmx[i] + '")';
+      var img = new Image();
+      img.src = '<%= asset_path 'kml.png' %>';
+      img.title = 'Can\'t do squat with this yet';
+      img.name = json.kmx[i];
+      if (document.all) {
+        // stupid IE
+        img = document.createElement("<img src='<%= asset_path 'folder.png' %>' title='Can\t do squat with this yet' name='" + json.kmx[i] + "'>");
+      }
+      a.appendChild(img);
+      td.appendChild(a);
+      tr.appendChild(td);
+      td = document.createElement('td');
+      a = document.createElement('a');
+      a.href = 'javascript:getKmx("' + json.kmx[i] + '")';
+      a.innerHTML = json.kmx[i].length > 50 ? json.kmx[i].substr(0,50) + '...' : json.kmx[i];
+      a.title = 'Can\'t do squat with this yet';
       td.appendChild(a);
       tr.appendChild(td);
       tbody.appendChild(tr);
@@ -139,9 +172,14 @@ function init() {
         Ext.getCmp('googleSearchPanel').getEl().mask();
         sto.removeAll();
         var q = sto.baseParams.query;
-        if (Ext.getCmp('wmsOnly').checked) {
-          q += ' wms getcapabilities';
+        var t = [];
+        if (Ext.getCmp('wmsTarget').checked) {
+          t.push('wms getcapabilities');
         }
+        if (Ext.getCmp('kmxTarget').checked) {
+          t.push('kml OR kmz');
+        }
+        q += ' ' + t.join(' OR ');
         q = q.replace(/ /g,'%20');
         sto.setBaseParam('u','https://www.googleapis.com/customsearch/v1?key=AIzaSyAaEv39VgrcSNx57xhfm-HWKICvt2yF_PY&cx=001601573511269779126:csdoo9kvazg'
           + '&q='     + q + '%20-filetype:pdf%20-filetype:doc%20-filetype:xls'
@@ -265,11 +303,18 @@ function init() {
            '<span style="color:#15428B;font:bold 11px tahoma,arial,verdana,sans-serif">Google results</span>'
           ,{icon : '<%= asset_path 'blank.png' %>'} // for spacing
           ,'->'
-          ,'Restrict results to WMS GetCapabilities listings?'
+          ,'Search target(s): '
           ,' '
+          ,'WMS'
           ,new Ext.form.Checkbox({
              checked : true
-            ,id      : 'wmsOnly'
+            ,id      : 'wmsTarget'
+          })
+          ,' '
+          ,'KML/KMZ'
+          ,new Ext.form.Checkbox({
+             checked : true
+            ,id      : 'kmxTarget'
           })
         ]
         ,bbar      : new Ext.PagingToolbar({
@@ -847,6 +892,10 @@ function getCaps(u) {
   else {
     parseGetCapsFromCache(u);
   }
+}
+
+function getKmx(u) {
+  Ext.Msg.alert('No KML/KMZ support yet','Listen to me the next time I warn you.');
 }
 
 function renderLink(val) {
