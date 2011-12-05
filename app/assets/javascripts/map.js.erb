@@ -126,7 +126,7 @@ function init() {
         img.name = json.kmx[i];
         if (document.all) {
           // stupid IE
-          img = document.createElement("<img src='<%= asset_path 'getCaps.png' %>' title='View dataset details' name='" + json.kmx[i] + "'>");
+          img = document.createElement("<img src='<%= asset_path 'kmx.png' %>' title='View dataset details' name='" + json.kmx[i] + "'>");
         }
         a.appendChild(img);
         td.appendChild(a);
@@ -186,7 +186,7 @@ function init() {
         q += ' ' + t.join(' OR ');
         q = q.replace(/ /g,'%20');
         sto.setBaseParam('u','https://www.googleapis.com/customsearch/v1?key=AIzaSyAaEv39VgrcSNx57xhfm-HWKICvt2yF_PY&cx=001601573511269779126:csdoo9kvazg'
-          + '&q='     + q + '%20-filetype:pdf%20-filetype:doc%20-filetype:xls%20-filetype:ppt'
+          + '&q='     + q // + '%20-filetype:pdf%20-filetype:doc%20-filetype:xls%20-filetype:ppt'
           + '&start=' + sto.baseParams.start
           + '&limit=' + googleSearchPageLimit
         );
@@ -194,8 +194,10 @@ function init() {
         activityStore.insert(0,new activityStore.recordType({
            i        : activityStore.getCount()
           ,type     : 'google.search'
-          ,request  : 'https://www.google.com/search'
-            + '?q=' + q + '%20-filetype:pdf%20-filetype:doc%20-filetype:xls%20-filetype:ppt'
+          ,request  : 'http://www.google.com/cse?cx=001601573511269779126:csdoo9kvazg'
+            + '&q='     + q // + '%20-filetype:pdf%20-filetype:doc%20-filetype:xls%20-filetype:ppt'
+            + '&start=' + sto.baseParams.start
+            + '&limit=' + googleSearchPageLimit
           ,response : 'n/a'
         }));
       }
@@ -916,8 +918,6 @@ function getKmx(u) {
     }
     else if (imgs[i].src.indexOf('explore') < 0) {
       imgs[i].src = '<%= asset_path 'loading.gif' %>';
-      Ext.Msg.alert('KML/KMZ details',"This link has been sent to the OGC-Search database.  When the database registered this link's details, the icon will change to <img src='<%= asset_path 'kmx_explore.png' %>'>.  Click on the link a second time to view the details.");
-
       if (!getCapsLinks[u]) {
         // register the url in the cache
         OpenLayers.Request.issue({
