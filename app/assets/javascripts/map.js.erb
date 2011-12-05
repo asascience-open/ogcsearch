@@ -186,10 +186,18 @@ function init() {
         q += ' ' + t.join(' OR ');
         q = q.replace(/ /g,'%20');
         sto.setBaseParam('u','https://www.googleapis.com/customsearch/v1?key=AIzaSyAaEv39VgrcSNx57xhfm-HWKICvt2yF_PY&cx=001601573511269779126:csdoo9kvazg'
-          + '&q='     + q + '%20-filetype:pdf%20-filetype:doc%20-filetype:xls'
+          + '&q='     + q + '%20-filetype:pdf%20-filetype:doc%20-filetype:xls%20-filetype:ppt'
           + '&start=' + sto.baseParams.start
           + '&limit=' + googleSearchPageLimit
         );
+
+        activityStore.insert(0,new activityStore.recordType({
+           i        : activityStore.getCount()
+          ,type     : 'google.search'
+          ,request  : 'https://www.google.com/search'
+            + '?q=' + q + '%20-filetype:pdf%20-filetype:doc%20-filetype:xls%20-filetype:ppt'
+          ,response : 'n/a'
+        }));
       }
       ,load : function(sto) {
         Ext.getCmp('googleSearchPanel').getEl().unmask();
