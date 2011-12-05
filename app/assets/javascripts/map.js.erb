@@ -1,4 +1,3 @@
-var initAlertShown = true;
 var map;
 var bathyGoogle;
 var bathyEsri;
@@ -7,12 +6,13 @@ var activeLayersStore = new Ext.data.ArrayStore({
   fields : ['switchViz','bbox','toTop','remove','name','getCaps','getCapsCached','legend']
 });
 var getCapsLinks = {};
+var kmxLinks     = {};
 var demoGetCapsLinks = {};
 var activityStore = new Ext.data.ArrayStore({
   fields : ['i','type','request','response']
 });
 var cacheSearchStore;
-var checkGetCapsStatusTimer;
+var checkCacheLinksStatusTimer;
 var mapWin;
 var proj4326   = new OpenLayers.Projection("EPSG:4326");
 var proj900913 = new OpenLayers.Projection("EPSG:900913");
@@ -74,71 +74,75 @@ function init() {
     }
     var json  = new OpenLayers.Format.JSON().read(r.responseText);
 
-    var table = document.createElement('table');
-    var tbody = document.createElement('tbody');
-    for (var i = 0; i < json.wms.length; i++ ) {
-      if (!getCapsLinks[json.wms[i]]) {
-        getCapsLinks[json.wms[i]] = false;
+    if (json.wms) {
+      var table = document.createElement('table');
+      var tbody = document.createElement('tbody');
+      for (var i = 0; i < json.wms.length; i++ ) {
+        if (!getCapsLinks[json.wms[i]]) {
+          getCapsLinks[json.wms[i]] = false;
+        }
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        var a = document.createElement('a');
+        a.href = 'javascript:getCaps("' + json.wms[i] + '")';
+        var img = new Image();
+        img.src = '<%= asset_path 'getCaps.png' %>';
+        img.title = 'View all layers from this set';
+        img.name = json.wms[i];
+        if (document.all) {
+          // stupid IE
+          img = document.createElement("<img src='<%= asset_path 'getCaps.png' %>' title='View all layers from this set' name='" + json.wms[i] + "'>");
+        }
+        a.appendChild(img);
+        td.appendChild(a);
+        tr.appendChild(td);
+        td = document.createElement('td');
+        a = document.createElement('a');
+        a.href = 'javascript:getCaps("' + json.wms[i] + '")';
+        a.innerHTML = json.wms[i].length > 50 ? json.wms[i].substr(0,50) + '...' : json.wms[i];
+        a.title = 'View all layers from this set';
+        td.appendChild(a);
+        tr.appendChild(td);
+        tbody.appendChild(tr);
       }
-      var tr = document.createElement('tr');
-      var td = document.createElement('td');
-      var a = document.createElement('a');
-      a.href = 'javascript:getCaps("' + json.wms[i] + '")';
-      var img = new Image();
-      img.src = '<%= asset_path 'folder.png' %>';
-      img.title = 'View all layers from this set';
-      img.name = json.wms[i];
-      if (document.all) {
-        // stupid IE
-        img = document.createElement("<img src='<%= asset_path 'folder.png' %>' title='View all layers from this set' name='" + json.wms[i] + "'>");
-      }
-      a.appendChild(img);
-      td.appendChild(a);
-      tr.appendChild(td);
-      td = document.createElement('td');
-      a = document.createElement('a');
-      a.href = 'javascript:getCaps("' + json.wms[i] + '")';
-      a.innerHTML = json.wms[i].length > 50 ? json.wms[i].substr(0,50) + '...' : json.wms[i];
-      a.title = 'View all layers from this set';
-      td.appendChild(a);
-      tr.appendChild(td);
-      tbody.appendChild(tr);
+      table.appendChild(tbody);
+      el.appendChild(table);
     }
-    table.appendChild(tbody);
-    el.appendChild(table);
 
-    table = document.createElement('table');
-    tbody = document.createElement('tbody');
-    for (var i = 0; i < json.kmx.length; i++ ) {
-      if (!getCapsLinks[json.kmx[i]]) {
-        getCapsLinks[json.kmx[i]] = false;
+    if (json.kmx) {
+      table = document.createElement('table');
+      tbody = document.createElement('tbody');
+      for (var i = 0; i < json.kmx.length; i++ ) {
+        if (!kmxLinks[json.kmx[i]]) {
+          kmxLinks[json.kmx[i]] = false;
+        }
+        var tr = document.createElement('tr');
+        var td = document.createElement('td');
+        var a = document.createElement('a');
+        a.href = 'javascript:getKmx("' + json.kmx[i] + '")';
+        var img = new Image();
+        img.src = '<%= asset_path 'kmx.png' %>';
+        img.title = 'View dataset details';
+        img.name = json.kmx[i];
+        if (document.all) {
+          // stupid IE
+          img = document.createElement("<img src='<%= asset_path 'getCaps.png' %>' title='View dataset details' name='" + json.kmx[i] + "'>");
+        }
+        a.appendChild(img);
+        td.appendChild(a);
+        tr.appendChild(td);
+        td = document.createElement('td');
+        a = document.createElement('a');
+        a.href = 'javascript:getKmx("' + json.kmx[i] + '")';
+        a.innerHTML = json.kmx[i].length > 50 ? json.kmx[i].substr(0,50) + '...' : json.kmx[i];
+        a.title = 'View dataset details';
+        td.appendChild(a);
+        tr.appendChild(td);
+        tbody.appendChild(tr);
       }
-      var tr = document.createElement('tr');
-      var td = document.createElement('td');
-      var a = document.createElement('a');
-      a.href = 'javascript:getKmx("' + json.kmx[i] + '")';
-      var img = new Image();
-      img.src = '<%= asset_path 'kml.png' %>';
-      img.title = 'Can\'t do squat with this yet';
-      img.name = json.kmx[i];
-      if (document.all) {
-        // stupid IE
-        img = document.createElement("<img src='<%= asset_path 'folder.png' %>' title='Can\t do squat with this yet' name='" + json.kmx[i] + "'>");
-      }
-      a.appendChild(img);
-      td.appendChild(a);
-      tr.appendChild(td);
-      td = document.createElement('td');
-      a = document.createElement('a');
-      a.href = 'javascript:getKmx("' + json.kmx[i] + '")';
-      a.innerHTML = json.kmx[i].length > 50 ? json.kmx[i].substr(0,50) + '...' : json.kmx[i];
-      a.title = 'Can\'t do squat with this yet';
-      td.appendChild(a);
-      tr.appendChild(td);
-      tbody.appendChild(tr);
+      table.appendChild(tbody);
+      el.appendChild(table);
     }
-    table.appendChild(tbody);
-    el.appendChild(table);
   }
 
   var googleSearchPageLimit = 10;
@@ -244,7 +248,7 @@ function init() {
             + '&page' + sto.baseParams.page
           ,response : 'n/a'
         }));
-        checkGetCapsStatus();
+        checkCacheLinksStatus();
       }
     }
   });
@@ -258,6 +262,8 @@ function init() {
 
   // override trigger2 so that it fires cacheSearch
   searchField.onTrigger2Click = function() {
+    getCapsLinks = {};
+    kmxLinks     = {};
     var v = this.getRawValue();
     if (v.length < 1){
     this.onTrigger1Click();
@@ -307,7 +313,7 @@ function init() {
           ,' '
           ,'WMS'
           ,new Ext.form.Checkbox({
-             checked : true
+             checked : false
             ,id      : 'wmsTarget'
           })
           ,' '
@@ -883,8 +889,8 @@ function getCaps(u) {
     });
   }
 
-  if (Ext.getCmp('getCaps')) {
-    Ext.getCmp('getCaps').destroy();
+  if (Ext.getCmp('getInfo')) {
+    Ext.getCmp('getInfo').destroy();
   }
   if (!getCapsLinks[u]) {
     parseGetCapsLocally(u);
@@ -895,7 +901,44 @@ function getCaps(u) {
 }
 
 function getKmx(u) {
-  Ext.Msg.alert('No KML/KMZ support yet','Listen to me the next time I warn you.');
+  var imgs = document.getElementsByName(u);  
+  for (var i = 0; i < imgs.length; i++) {
+    if (imgs[i].src == '<%= asset_path 'loading.gif' %>') {
+      return;
+    }
+    else if (imgs[i].src.indexOf('explore') < 0) {
+      imgs[i].src = '<%= asset_path 'loading.gif' %>';
+      Ext.Msg.alert('KML/KMZ details',"This link has been sent to the OGC-Search database.  When the database registered this link's details, the icon will change to <img src='<%= asset_path 'kmx_explore.png' %>'>.  Click on the link a second time to view the details.");
+
+      if (!getCapsLinks[u]) {
+        // register the url in the cache
+        OpenLayers.Request.issue({
+           method  : 'GET'
+          ,url     : '/kmx/parse.json'
+            + '?url=' + encodeURIComponent(u)
+            + '&terms=' + Ext.getCmp('searchField').getValue()
+          ,callback : function(r) {
+            // log activity
+            var json = new OpenLayers.Format.JSON().read(r.responseText);
+            activityStore.insert(0,new activityStore.recordType({
+               i        : activityStore.getCount()
+              ,type     : 'parse.json'
+              ,request  : '/kmx/parse.json'
+                + '?url=' + encodeURIComponent(u)
+                + '&terms=' + Ext.getCmp('searchField').getValue()
+              ,response : json.status
+            }));
+          }
+        });
+      }
+    }
+    else {
+      if (Ext.getCmp('getInfo')) {
+        Ext.getCmp('getInfo').destroy();
+      }
+      parseKmxFromCache(u);
+    }
+  }
 }
 
 function renderLink(val) {
@@ -921,10 +964,10 @@ function renderLayerToTop(val,metadata,rec) {
 function renderLayerGetCaps(val,metadata,rec) {
   metadata.attr = 'ext:qtip="View all layers from this set"';
   if (rec.get('getCapsCached')) {
-    return '<a href="javascript:getCaps(\'' + val + '\')"><img src="<%= asset_path 'folder_explore.png' %>" width=16 height=16></a>';
+    return '<a href="javascript:getCaps(\'' + val + '\')"><img src="<%= asset_path 'getCaps_explore.png' %>" width=16 height=16></a>';
   }
   else {
-    return '<a href="javascript:getCaps(\'' + val + '\')"><img src="<%= asset_path 'folder.png' %>" width=16 height=16></a>';
+    return '<a href="javascript:getCaps(\'' + val + '\')"><img src="<%= asset_path 'getCaps.png' %>" width=16 height=16></a>';
   }
 }
 
@@ -1255,67 +1298,65 @@ function addDemoLyrs() {
   Ext.getCmp('searchField').onTrigger2Click();
 }
 
-function checkGetCapsStatus() {
-  checkGetCapsStatusTimer = setTimeout('checkGetCapsStatus()',10000);
+function checkCacheLinksStatus() {
+  checkCacheLinksStatusTimer = setTimeout('checkCacheLinksStatus()',10000);
   if (Ext.getCmp('autoSyncButton') && !Ext.getCmp('autoSyncButton').pressed) {
     return;
   }
-  if (!initAlertShown) {
-    new Ext.Window({
-       title : 'Icon descriptions'
-      ,items : [{border : false,html : '<table id="initAlert"><tr><td><img src="<%= asset_path 'folder.png' %>"></td><td>A GetCaps link that might not be available in the OGC-Search cache.</tr><tr><td><img src="<%= asset_path 'folder_explore.png' %>"></td><td>A GetCaps link that is available in the cache.</td></tr></table>'}]
-      ,modal : true
-      ,constrainHeader : true
-    }).show();
-    initAlertShown = true;
-  }
 
-  function syncGetCapsIcons(u) {
-    var imgs = document.getElementsByName(u);
-    for (var i = 0; i < imgs.length; i++) {
-      if (getCapsLinks[u]) {
-        imgs[i].src = '<%= asset_path 'folder_explore.png' %>';
+  function sync(name,links) {
+
+    function syncIcons(name,links,u) {
+      var imgs = document.getElementsByName(u);
+      for (var i = 0; i < imgs.length; i++) {
+        if (links[u]) {
+          imgs[i].src = '<%= asset_path '' %>' + name + '_explore.png';
+        }
       }
     }
-  }
 
-  function syncGetCapsIconsActiveLayers(u) {
-    activeLayersStore.each(function(rec) {
-      if (rec.get('getCaps') == u) {
-        rec.set('getCapsCached',getCapsLinks[u]);
-        rec.commit();
-      }
-    });
-  }
-
-  function statusCallback(u,r) {
-    var json = new OpenLayers.Format.JSON().read(r.responseText);
-    getCapsLinks[u] = json.status == 'OK';
-    // log activity
-    activityStore.insert(0,new activityStore.recordType({
-       i        : activityStore.getCount()
-      ,type     : 'status.json'
-      ,request  : '/wms/status.json'
-        + '?url=' + encodeURIComponent(u)
-      ,response : json.status
-    }));
-    syncGetCapsIcons(u);
-    syncGetCapsIconsActiveLayers(u);
-  }
-
-  for (var u in getCapsLinks) {
-    if (!getCapsLinks[u]) {
-      OpenLayers.Request.issue({
-         method   : 'GET'
-        ,url      : '/wms/status.json' + '?url=' + encodeURIComponent(u)
-        ,callback : OpenLayers.Function.bind(statusCallback,null,u)
+    function syncIconsActiveLayers(name,links,u) {
+      activeLayersStore.each(function(rec) {
+        if (rec.get(name) == u) {
+          rec.set(name + 'Cached',links[u]);
+          rec.commit();
+        }
       });
     }
-    else {
-      syncGetCapsIcons(u);
-      syncGetCapsIconsActiveLayers(u);
+
+    function statusCallback(name,links,u,r) {
+      var json = new OpenLayers.Format.JSON().read(r.responseText);
+      links[u] = json.status == 'OK';
+      // log activity
+      activityStore.insert(0,new activityStore.recordType({
+         i        : activityStore.getCount()
+        ,type     : 'status.json'
+        ,request  : (name == 'getCaps' ? '/wms' : '/kmx') + '/status.json'
+          + '?url=' + encodeURIComponent(u)
+        ,response : json.status
+      }));
+      syncIcons(name,links,u);
+      syncIconsActiveLayers(name,links,u);
     }
+
+    for (var u in links) {
+      if (!links[u]) {
+        OpenLayers.Request.issue({
+           method   : 'GET'
+          ,url      : (name == 'getCaps' ? '/wms' : '/kmx') + '/status.json' + '?url=' + encodeURIComponent(u)
+          ,callback : OpenLayers.Function.bind(statusCallback,null,name,links,u)
+        });
+      }
+      else {
+        syncIcons(name,links,u);
+        syncIconsActiveLayers(name,links,u);
+      }
+    }
+
   }
+
+  // sync('getCaps',getCapsLinks);  
+  sync('kmx',kmxLinks);
 }
 
 function parseGetCapsLocally(u) {
@@ -1329,7 +1370,7 @@ function parseGetCapsLocally(u) {
 
   new Ext.Window({
      title       : u
-    ,id          : 'getCaps'
+    ,id          : 'getInfo'
     ,layout      : 'fit'
     ,width       : 500
     ,height      : 250
@@ -1389,7 +1430,7 @@ function parseGetCapsFromCache(u) {
 
   new Ext.Window({
      title       : u
-    ,id          : 'getCaps'
+    ,id          : 'getInfo'
     ,layout      : 'fit'
     ,width       : 500
     ,height      : 250
@@ -1465,5 +1506,27 @@ function parseGetCapsFromCache(u) {
         }}
       })
     ]
+  }).show();
+}
+
+function parseKmxFromCache(u) {
+  // log activity
+  activityStore.insert(0,new activityStore.recordType({
+     i        : activityStore.getCount()
+    ,type     : 'find.json'
+    ,request  : '/kmx/find.json' + '?url=' + encodeURIComponent(u)
+    ,response : 'n/a'
+  }));
+
+  new Ext.Window({
+     title       : u
+    ,id          : 'getInfo'
+    ,layout      : 'fit'
+    ,width       : 500
+    ,height      : 250
+    ,autoScroll  : true
+    ,bodyStyle   : 'background:white'
+    ,constrainHeader : true
+    ,html        : "<a target=_blank href='" + '/kmx/find.json' + '?url=' + encodeURIComponent(u) + "'>/kmx/find.json</a>"
   }).show();
 }
