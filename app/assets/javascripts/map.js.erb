@@ -1655,7 +1655,8 @@ function parseKmxFromCache(u) {
      method   : 'GET'
     ,url      : '/kmx/find.json?url=' + encodeURIComponent(u)
     ,callback : function(r) {
-      kmx = [];
+      kmx  = [];
+      recs = [];
       var json = new OpenLayers.Format.JSON().read(r.responseText);
       for (var i = 0; i < json.placemarks.length; i++) {
         var geojson = new OpenLayers.Format.GeoJSON();
@@ -1665,17 +1666,18 @@ function parseKmxFromCache(u) {
            ,features    : geojson.read(json.placemarks[i].geojson)
            ,rootKmx     : u
         });
-        sto.add(new sto.recordType({
-            c           : sto.getCount() + 1
-           ,name        : json.placemarks[i].geojson.properties.name
-           ,description : json.placemarks[i].geojson.properties.description
-        }));
+        recs.push([
+            recs.length + 1
+           ,json.placemarks[i].geojson.properties.name
+           ,json.placemarks[i].geojson.properties.description
+        ]);
       }
 
-      if (sto.getCount() == 0) {
+      if (recs.length == 0) {
         Ext.Msg.alert('Add KML/KMZ','Sorry, no layers were found.');
         return;
       }
+      sto.loadData(recs);
 
       new Ext.Window({
          title       : u
