@@ -90,12 +90,22 @@ function init() {
         var a = document.createElement('a');
         a.href = 'javascript:getCaps("' + json.wms[i] + '")';
         var img = new Image();
-        img.src = '<%= asset_path 'getCaps.png' %>';
+        if (getCapsLinks[json.wms[i]]) {
+          img.src = '<%= asset_path 'getCaps_explore.png' %>';
+        }
+        else {
+          img.src = '<%= asset_path 'getCaps.png' %>';
+        }
         img.title = 'View all layers from this set';
         img.name = json.wms[i];
         if (Ext.isIE && !Ext.isIE9) {
           // stupid IE
-          img = document.createElement("<img src='<%= asset_path 'getCaps.png' %>' title='View all layers from this set' name='" + json.wms[i] + "'>");
+          if (getCapsLinks[json.wms[i]]) {
+            img = document.createElement("<img src='<%= asset_path 'getCaps_explore.png' %>' title='View all layers from this set' name='" + json.wms[i] + "'>");
+          }
+          else {
+            img = document.createElement("<img src='<%= asset_path 'getCaps.png' %>' title='View all layers from this set' name='" + json.wms[i] + "'>");
+          }
         }
         a.appendChild(img);
         td.appendChild(a);
@@ -125,12 +135,22 @@ function init() {
         var a = document.createElement('a');
         a.href = 'javascript:getKmx("' + json.kmx[i] + '")';
         var img = new Image();
-        img.src = '<%= asset_path 'kmx.png' %>';
+        if (kmxLinks[json.kmx[i]]) {
+          img.src = '<%= asset_path 'kmx_explore.png' %>';
+        }
+        else {
+          img.src = '<%= asset_path 'kmx.png' %>';
+        }
         img.title = 'View dataset details';
         img.name = json.kmx[i];
         if (Ext.isIE && !Ext.isIE9) {
           // stupid IE
-          img = document.createElement("<img src='<%= asset_path 'kmx.png' %>' title='View dataset details' name='" + json.kmx[i] + "'>");
+          if (kmxLinks[json.kmx[i]]) {
+            img = document.createElement("<img src='<%= asset_path 'kmx_explore.png' %>' title='View dataset details' name='" + json.kmx[i] + "'>");
+          }
+          else {
+            img = document.createElement("<img src='<%= asset_path 'kmx.png' %>' title='View dataset details' name='" + json.kmx[i] + "'>");
+          }
         }
         a.appendChild(img);
         td.appendChild(a);
@@ -276,8 +296,17 @@ function init() {
 
   // override trigger2 so that it fires cacheSearch
   searchField.onTrigger2Click = function() {
-    getCapsLinks = {};
-    kmxLinks     = {};
+    // get rid of unprocessed links
+    for (var i in getCapsLinks) {
+      if (!getCapsLinks[i]) {
+        delete getCapsLinks[i];
+      }
+    }
+    for (var i in kmxLinks) {
+      if (!kmxLinks[i]) {
+        delete kmxLinks[i];
+      }
+    }
     var v = this.getRawValue();
     if (v.length < 1){
     this.onTrigger1Click();
@@ -948,12 +977,12 @@ function getCaps(u) {
 
 function getKmx(u) {
   var imgs = document.getElementsByName(u);  
-  for (var i = 0; i < imgs.length; i++) {
-    if (imgs[i].src == '<%= asset_path 'loading.gif' %>') {
+  if (imgs.length > 0) {
+    if (imgs[0].src == '<%= asset_path 'loading.gif' %>') {
       return;
     }
-    else if (imgs[i].src.indexOf('explore') < 0) {
-      imgs[i].src = '<%= asset_path 'loading.gif' %>';
+    else if (imgs[0].src.indexOf('explore') < 0) {
+      imgs[0].src = '<%= asset_path 'loading.gif' %>';
       if (!getCapsLinks[u]) {
         // register the url in the cache
         OpenLayers.Request.issue({
@@ -1010,10 +1039,10 @@ function renderLayerGetInfo(val,metadata,rec) {
   var lyr = map.getLayersByName(rec.get('name'))[0];
   if (lyr instanceof OpenLayers.Layer.Vector) {
     if (rec.get('kmxCached')) {
-      return '<a href="javascript:getKmx(\'' + lyr.features[0].attributes.rootKmx + '\')"><img src="<%= asset_path 'kmx_explore.png' %>" width=16 height=16></a>';
+      return '<a href="javascript:getKmx(\'' + lyr.features[0].attributes.rootKmx + '\')"><img name="' + lyr.features[0].attributes.rootKmx + '" src="<%= asset_path 'kmx_explore.png' %>" width=16 height=16></a>';
     }
     else {
-      return '<a href="javascript:getKmx(\'' + lyr.features[0].attributes.rootKmx + '\')"><img src="<%= asset_path 'kmx.png' %>" width=16 height=16></a>';
+      return '<a href="javascript:getKmx(\'' + lyr.features[0].attributes.rootKmx + '\')"><img name="' + lyr.features[0].attributes.rootKmx + '" src="<%= asset_path 'kmx.png' %>" width=16 height=16></a>';
     }
   }
   else {
