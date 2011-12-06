@@ -521,14 +521,22 @@ function init() {
     ,listeners : {
       afterrender : function(w) {
         initMap();
+        if (Ext.isIE) {
+          var el = document.getElementById('map');
+          if (el && map) {
+            el.style.width  = w.getWidth() + 'px';
+            el.style.height = w.getHeight() + 'px';
+            map.updateSize();
+          }
+        }
         Ext.getCmp('timeSlider').setWidth(w.getInnerWidth() - 75);
         Ext.getCmp('sliderTics').setWidth(w.getInnerWidth() - 48);
       }
       ,bodyresize : function(p,w,h) {
         var el = document.getElementById('map');
         if (el && map) {
-          el.style.width = w;
-          el.style.height = h;
+          el.style.width  = w + 'px';
+          el.style.height = h + 'px';
           map.updateSize();
           Ext.getCmp('timeSlider').setWidth(w - 75);
           Ext.getCmp('sliderTics').setWidth(w - 48);
