@@ -91,7 +91,7 @@ function init() {
         img.src = '<%= asset_path 'getCaps.png' %>';
         img.title = 'View all layers from this set';
         img.name = json.wms[i];
-        if (document.all) {
+        if (Ext.isIE && !Ext.isIE9) {
           // stupid IE
           img = document.createElement("<img src='<%= asset_path 'getCaps.png' %>' title='View all layers from this set' name='" + json.wms[i] + "'>");
         }
@@ -126,7 +126,7 @@ function init() {
         img.src = '<%= asset_path 'kmx.png' %>';
         img.title = 'View dataset details';
         img.name = json.kmx[i];
-        if (document.all) {
+        if (Ext.isIE && !Ext.isIE9) {
           // stupid IE
           img = document.createElement("<img src='<%= asset_path 'kmx.png' %>' title='View dataset details' name='" + json.kmx[i] + "'>");
         }
