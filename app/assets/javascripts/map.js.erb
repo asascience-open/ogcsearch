@@ -59,14 +59,6 @@ function init() {
   });
 
   function extractCallback(u,r) {
-    // log activity
-    activityStore.insert(0,new activityStore.recordType({
-       i        : activityStore.getCount()
-      ,type     : 'extract.json'
-      ,request  : '/extract.json'
-        + '?url=' + encodeURIComponent(u)
-      ,response : r.responseText == '' ? 'ERROR' : 'OK'
-    }));
     var el = document.getElementById(u);
     if (el) {
       el.removeChild(el.getElementsByTagName('img')[0]);
@@ -74,9 +66,19 @@ function init() {
     if (!el || r.responseText == '') {
       return;
     }
+
     var json = new OpenLayers.Format.JSON().read(r.responseText);
 
-    if (json.wms) {
+    // log activity
+    activityStore.insert(0,new activityStore.recordType({
+       i        : activityStore.getCount()
+      ,type     : 'extract.json'
+      ,request  : '/extract.json'
+        + '?url=' + encodeURIComponent(u)
+      ,response : json ? 'OK' : 'ERROR'
+    }));
+
+    if (json && json.wms) {
       var table = document.createElement('table');
       var tbody = document.createElement('tbody');
       for (var i = 0; i < json.wms.length; i++ ) {
@@ -111,7 +113,7 @@ function init() {
       el.appendChild(table);
     }
 
-    if (json.kmx) {
+    if (json && json.kmx) {
       table = document.createElement('table');
       tbody = document.createElement('tbody');
       for (var i = 0; i < json.kmx.length; i++ ) {
@@ -927,7 +929,7 @@ function getCaps(u) {
           ,request  : '/wms/parse.json'
             + '?url=' + encodeURIComponent(u)
             + '&terms=' + Ext.getCmp('searchField').getValue()
-          ,response : json.status
+          ,response : json ? json.status : 'ERROR'
         }));
       }
     });
@@ -968,7 +970,7 @@ function getKmx(u) {
               ,request  : '/kmx/parse.json'
                 + '?url=' + encodeURIComponent(u)
                 + '&terms=' + Ext.getCmp('searchField').getValue()
-              ,response : json.status
+              ,response : json ? json.status : 'ERROR'
             }));
           }
         });
@@ -1463,15 +1465,17 @@ function checkCacheLinksStatus() {
 
     function statusCallback(name,links,u,r) {
       var json = new OpenLayers.Format.JSON().read(r.responseText);
-      links[u] = json.status == 'OK';
       // log activity
       activityStore.insert(0,new activityStore.recordType({
          i        : activityStore.getCount()
         ,type     : 'status.json'
         ,request  : (name == 'getCaps' ? '/wms' : '/kmx') + '/status.json'
           + '?url=' + encodeURIComponent(u)
-        ,response : json.status
+        ,response : json ? json.status : 'ERROR'
       }));
+      if (json) {
+        links[u] = json.status == 'OK';
+      }
       syncIcons(name,links,u);
       syncIconsActiveLayers(name,links,u);
     }
