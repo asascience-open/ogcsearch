@@ -1675,33 +1675,33 @@ function parseKmxFromCache(u) {
 
       if (recs.length == 0) {
         Ext.Msg.alert('Add KML/KMZ','Sorry, no layers were found.');
-        return;
       }
-      sto.loadData(recs);
-
-      new Ext.Window({
-         title       : u
-        ,id          : 'getInfo'
-        ,layout      : 'fit'
-        ,width       : 500
-        ,height      : 250
-        ,autoScroll  : true
-        ,bodyStyle   : 'background:white'
-        ,constrainHeader : true
-        ,items       : [
-          new Ext.DataView({
-             tpl          :  new Ext.XTemplate(
-               '<tpl for=".">'
-              ,'<div class="search-item">'
-                ,'<table id="cacheResultsHeader"><tr><td>{c}.</td><td><a href="javascript:addKmx({c})"><img src="<%= asset_path 'map_add.png' %>" title="Add layer to map"></a></td><td><a href="javascript:addKmx({c})" title="Add layer to map">{name}</a></td><td><img width=10 src="<%= asset_path 'blank.png' %>"></td><td>{description}</td></table>'
-              ,'</div></tpl>'
-            )
-            ,store        : sto
-            ,itemSelector : 'div.search-item'
-            ,autoScroll   : true
-          })
-        ]
-      }).show();
+      else {
+        sto.loadData(recs);
+        new Ext.Window({
+           title       : u
+          ,id          : 'getInfo'
+          ,layout      : 'fit'
+          ,width       : 500
+          ,height      : 250
+          ,autoScroll  : true
+          ,bodyStyle   : 'background:white'
+          ,constrainHeader : true
+          ,items       : [
+            new Ext.DataView({
+               tpl          :  new Ext.XTemplate(
+                 '<tpl for=".">'
+                ,'<div class="search-item">'
+                  ,'<table id="cacheResultsHeader"><tr><td>{c}.</td><td><a href="javascript:addKmx({c})"><img src="<%= asset_path 'map_add.png' %>" title="Add layer to map"></a></td><td><a href="javascript:addKmx({c})" title="Add layer to map">{name}</a></td><td><img width=10 src="<%= asset_path 'blank.png' %>"></td><td>{description}</td></table>'
+                ,'</div></tpl>'
+              )
+              ,store        : sto
+              ,itemSelector : 'div.search-item'
+              ,autoScroll   : true
+            })
+          ]
+        }).show();
+      }
     }
   });
 }
