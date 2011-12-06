@@ -47,22 +47,22 @@ class ParseKmx < GlobalJob
       pmk.description = xl.xpath("description").text
 
       # Points
-      points = xl.xpath("//Point/coordinates").map do |p|
+      points = xl.xpath("Point/coordinates").map do |p|
         extract_points(factory, p.text)
       end.flatten
 
       # Lines
-      lines = xl.xpath("//LineString/coordinates").map do |lin|
+      lines = xl.xpath("LineString/coordinates").map do |lin|
         factory.line_string(extract_points(factory, lin.text))
       end
 
       # Polygons
-      polygons = xl.xpath("//Polygon").map do |p|
-        outer = p.xpath("//outerBoundaryIs/LinearRing/coordinates").map do |otr|
+      polygons = xl.xpath("Polygon").map do |p|
+        outer = p.xpath("outerBoundaryIs/LinearRing/coordinates").map do |otr|
           factory.linear_ring(extract_points(factory, otr.text))
         end.first
 
-        inners = p.xpath("//innerBoundaryIs/LinearRing/coordinates").map do |lr|
+        inners = p.xpath("innerBoundaryIs/LinearRing/coordinates").map do |lr|
           factory.linear_ring(extract_points(factory, lr.text))
         end
         factory.polygon(outer,inners)
@@ -81,7 +81,7 @@ class ParseKmx < GlobalJob
   def extract_points(factory, str)
     str.strip.split(" ").map do |pts|
       lon_lat = pts.split(",")
-      # KML 2.2: Longitude, Latitude, Altitude 
+      # KML 2.2: Longitude, Latitude, Altitude
       factory.point(lon_lat[0], lon_lat[1])
     end
   end
