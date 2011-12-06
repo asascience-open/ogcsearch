@@ -2,11 +2,13 @@ var map;
 var bathyGoogle;
 var bathyEsri;
 var bathyBlueMarble;
+var popupCtl;
 var activeLayersStore = new Ext.data.ArrayStore({
-  fields : ['switchViz','bbox','toTop','remove','name','getCaps','getCapsCached','legend']
+  fields : ['switchViz','bbox','toTop','remove','name','getInfo','getCapsCached','kmxCached','legend']
 });
 var getCapsLinks = {};
 var kmxLinks     = {};
+var kmx          = [];
 var demoGetCapsLinks = {};
 var activityStore = new Ext.data.ArrayStore({
   fields : ['i','type','request','response']
@@ -72,7 +74,7 @@ function init() {
     if (!el || r.responseText == '') {
       return;
     }
-    var json  = new OpenLayers.Format.JSON().read(r.responseText);
+    var json = new OpenLayers.Format.JSON().read(r.responseText);
 
     if (json.wms) {
       var table = document.createElement('table');
@@ -323,7 +325,7 @@ function init() {
           ,' '
           ,'WMS'
           ,new Ext.form.Checkbox({
-             checked : false
+             checked : true
             ,id      : 'wmsTarget'
           })
           ,' '
@@ -469,7 +471,7 @@ function init() {
              tpl          :  new Ext.XTemplate(
                '<tpl for=".">'
               ,'<div class="search-item">'
-                ,'<table id="cacheResultsHeader"><tr><td><a href="javascript:addWMS(\'{_id}\')"><img src="<%= asset_path 'map_add.png' %>" title="Add layer to map"></a></td><td><a title="Add layer to map" href="javascript:addWMS(\'{_id}\')">{title}</a></td></tr></table><span class="displayLink">{[values.url.replace("http://","").split("?")[0]]}</span><br>{[values.abstract != "" ? values.abstract + "<br>" : ""]}'
+                ,'<table id="cacheResultsHeader"><tr><td><a href="javascript:addWms(\'{_id}\')"><img src="<%= asset_path 'map_add.png' %>" title="Add layer to map"></a></td><td><a title="Add layer to map" href="javascript:addWms(\'{_id}\')">{title}</a></td></tr></table><span class="displayLink">{[values.url.replace("http://","").split("?")[0]]}</span><br>{[values.abstract != "" ? values.abstract + "<br>" : ""]}'
 //                ,'<tpl for="wms_styles_json">{[values.legend_url ? "<img height=40 src=\'" + values.legend_url + "\'>&nbsp;&nbsp;" : ""]}</tpl>'
               ,'</div></tpl>'
             )
@@ -686,15 +688,9 @@ function init() {
          text    : 'Remove all'
         ,icon    : '<%= asset_path 'trash-icon.png' %>'
         ,handler : function() {
-          var l = [];
-          for (var i = 0; i < map.layers.length; i++) {
-            if (!map.layers[i].isBaseLayer && map.layers[i].name != 'ESRI Ocean (EPSG:900913)') {
-              l.push(map.layers[i]);
-            }
-          }
-          for (var i = 0; i < l.length; i++) {
-            map.removeLayer(l[i]);
-          }
+          activeLayersStore.each(function(rec) {
+            map.removeLayer(map.getLayersByName(rec.get('name'))[0]);
+          });
         }
       }
     ]
@@ -709,7 +705,7 @@ function init() {
            {dataIndex : 'switchViz',renderer : renderLayerVisibility,width : 30,align : 'center'}
           ,{dataIndex : 'bbox'     ,renderer : renderLayerBbox      ,width : 30,align : 'center'}
           ,{dataIndex : 'toTop'    ,renderer : renderLayerToTop     ,width : 30,align : 'center'}
-          ,{dataIndex : 'getCaps'  ,renderer : renderLayerGetCaps   ,width : 30,align : 'center'}
+          ,{dataIndex : 'getInfo'  ,renderer : renderLayerGetInfo   ,width : 30,align : 'center'}
           ,{dataIndex : 'legend'   ,renderer : renderLayerLegend    ,width : 30,align : 'center'}
           ,{dataIndex : 'settings' ,renderer : renderSettings       ,width : 30,align : 'center'}
           ,{dataIndex : 'image'    ,renderer : renderLayerImage     ,width : 30,align : 'center'}
@@ -813,6 +809,9 @@ function initMap() {
       Ext.Msg.alert('Add layer error','A layer with this name has already been mapped.');
       return false;
     }
+    if (e.layer instanceof OpenLayers.Layer.Vector || e.layer.name.indexOf('OpenLayers.Control') == 0) {
+      return true;
+    }
     var projOK = (map.getProjection().toLowerCase() == 'epsg:900913' || map.getProjection().toLowerCase() == 'epsg:3857')
         && (String(e.layer.options.projection).toLowerCase() == 'epsg:900913' || String(e.layer.options.projection).toLowerCase() == 'epsg:3857')
     var projAlternates = [];
@@ -832,6 +831,9 @@ function initMap() {
   });
 
   map.events.register('addlayer',this,function(e) {
+    if (e.layer.name.indexOf('OpenLayers.Control') == 0) {
+      return true;
+    }
     e.layer.events.register('loadstart',this,function(e) {
       var idx = activeLayersStore.find('name',e.object.name);
       if (idx >= 0 && e.object.visibility) {
@@ -861,12 +863,36 @@ function initMap() {
     activeLayersStore.insert(0,new activeLayersStore.recordType({
        name          : e.layer.name
       ,bbox          : e.layer.options.llbbox
-      ,getCaps       : e.layer.options.getcaps
+      ,getInfo       : e.layer.options.getcaps
       ,getCapsCached : getCapsLinks[e.layer.options.getcaps]
+      ,kmxCached     : e.layer instanceof OpenLayers.Layer.Vector
+      ,switchViz     : e.layer instanceof OpenLayers.Layer.Vector ? 'off' : 'loading'
     }));
   });
 
   map.events.register('removelayer',this,function(e) {
+// foo
+    if (e.layer.name.indexOf('OpenLayers.Control') == 0) {
+      return true;
+    }
+    if (e.layer instanceof OpenLayers.Layer.Vector) {
+      var layers = [];
+      if (popupCtl.layers) {
+        for (var i = 0; i < popupCtl.layers.length; i++) {
+          if (popupCtl.layers[i].name != e.layer.name) {
+            layers.push(popupCtl.layers[i]);
+          }
+        }
+      }
+      if (!popupCtl.layers || layers.length == 0) {
+        popupCtl.deactivate();
+        map.removeControl(popupCtl); 
+        popupCtl = null;
+      } 
+      else {
+        popupCtl.setLayer(layers);
+      }
+    }
     var idx = activeLayersStore.find('name',e.layer.name);
     if (idx >= 0) {
       activeLayersStore.removeAt(idx);
@@ -969,18 +995,34 @@ function renderLayerToTop(val,metadata,rec) {
   return '<a href="javascript:moveLayerToTop(\'' + rec.get('name') + '\')"><img src="<%= asset_path 'move-top.png' %>" width=16 height=16></a>';
 }
 
-function renderLayerGetCaps(val,metadata,rec) {
+function renderLayerGetInfo(val,metadata,rec) {
   metadata.attr = 'ext:qtip="View all layers from this set"';
-  if (rec.get('getCapsCached')) {
-    return '<a href="javascript:getCaps(\'' + val + '\')"><img src="<%= asset_path 'getCaps_explore.png' %>" width=16 height=16></a>';
+  var lyr = map.getLayersByName(rec.get('name'))[0];
+  if (lyr instanceof OpenLayers.Layer.Vector) {
+    if (rec.get('kmxCached')) {
+      return '<a href="javascript:getKmx(\'' + lyr.features[0].attributes.rootKmx + '\')"><img src="<%= asset_path 'kmx_explore.png' %>" width=16 height=16></a>';
+    }
+    else {
+      return '<a href="javascript:getKmx(\'' + lyr.features[0].attributes.rootKmx + '\')"><img src="<%= asset_path 'kmx.png' %>" width=16 height=16></a>';
+    }
   }
   else {
-    return '<a href="javascript:getCaps(\'' + val + '\')"><img src="<%= asset_path 'getCaps.png' %>" width=16 height=16></a>';
+    if (rec.get('getCapsCached')) {
+      return '<a href="javascript:getCaps(\'' + val + '\')"><img src="<%= asset_path 'getCaps_explore.png' %>" width=16 height=16></a>';
+    }
+    else {
+      return '<a href="javascript:getCaps(\'' + val + '\')"><img src="<%= asset_path 'getCaps.png' %>" width=16 height=16></a>';
+    }
   }
 }
 
 function renderLayerLegend(val,metadata,rec) {
-  if (val == 'loading') {
+  var lyr = map.getLayersByName(rec.get('name'))[0];
+  if (lyr instanceof OpenLayers.Layer.Vector) {
+    metadata.attr = 'ext:qtip="This functionality is not available for this layer type"';
+    return '<img src="<%= asset_path 'legend-icon_disabled.png' %>" width=16 height=16>';
+  }
+  else if (val == 'loading') {
     metadata.attr = 'ext:qtip="Loading..."';
     return '<img src="<%= asset_path 'loading.gif' %>" width=16 height=16>';
   }
@@ -991,14 +1033,28 @@ function renderLayerLegend(val,metadata,rec) {
 }
 
 function renderSettings(val,metadata,rec) {
-  metadata.attr = 'ext:qtip="View layer options"';
-  return '<a id="settings.' + rec.get('name') + '" href="javascript:showLayerSettings(\'' + rec.get('name') + '\')"><img src="<%= asset_path 'Options.png' %>" width=16 height=16></a>';
+  var lyr = map.getLayersByName(rec.get('name'))[0];
+  if (lyr instanceof OpenLayers.Layer.Vector) {
+    metadata.attr = 'ext:qtip="This functionality is not available for this layer type"';
+    return '<img src="<%= asset_path 'Options_disabled.png' %>" width=16 height=16>';
+  }
+  else {
+    metadata.attr = 'ext:qtip="View layer options"';
+    return '<a id="settings.' + rec.get('name') + '" href="javascript:showLayerSettings(\'' + rec.get('name') + '\')"><img src="<%= asset_path 'Options.png' %>" width=16 height=16></a>';
+  }
 }
 
 function renderLayerImage(val,metadata,rec) {
-  var url = map.getLayersByName(rec.get('name'))[0].getFullRequestString({}) + '&bbox=' + map.getExtent().toArray() + '&width=' + mapWin.getInnerWidth() + '&height=' + mapWin.getInnerHeight();
-  metadata.attr = 'ext:qtip="View this layer in a new window"';
-  return '<a target=_blank href="' + url + '"><img src="<%= asset_path 'map_go.png' %>" width=16 height=16></a>';
+  var lyr = map.getLayersByName(rec.get('name'))[0];
+  if (lyr instanceof OpenLayers.Layer.Vector) {
+    metadata.attr = 'ext:qtip="This functionality is not available for this layer type"';
+    return '<img src="<%= asset_path 'map_go_disabled.png' %>" width=16 height=16>';
+  }
+  else {
+    var url = lyr.getFullRequestString({}) + '&bbox=' + map.getExtent().toArray() + '&width=' + mapWin.getInnerWidth() + '&height=' + mapWin.getInnerHeight();
+    metadata.attr = 'ext:qtip="View this layer in a new window"';
+    return '<a target=_blank href="' + url + '"><img src="<%= asset_path 'map_go.png' %>" width=16 height=16></a>';
+  }
 }
 
 function renderLayerRemove(val,metadata,rec) {
@@ -1008,7 +1064,13 @@ function renderLayerRemove(val,metadata,rec) {
 
 function renderLayerBbox(val,metadata,rec) {
   metadata.attr = 'ext:qtip="Zoom to layer"';
-  return '<a href="javascript:zoomToBbox(\'' + val + '\')"><img src="<%= asset_path 'Search.png' %>" width=16 height=16></a>';
+  var lyr = map.getLayersByName(rec.get('name'))[0];
+  if (lyr instanceof OpenLayers.Layer.Vector) {
+    return '<a href="javascript:zoomToBbox(\'' + lyr.features[0].attributes.bbox + '\')"><img src="<%= asset_path 'Search.png' %>" width=16 height=16></a>';
+  }
+  else {
+    return '<a href="javascript:zoomToBbox(\'' + val + '\')"><img src="<%= asset_path 'Search.png' %>" width=16 height=16></a>';
+  }
 }
 
 function toggleLayerVisibility(name) {
@@ -1218,7 +1280,7 @@ function showLayerSettings(name) {
   }
 }
 
-function addWMS(id) {
+function addWms(id) {
   var idx = cacheSearchStore.find('_id',id);
   if (idx >= 0) {
     var rec = cacheSearchStore.getAt(idx);
@@ -1250,6 +1312,65 @@ function addWMS(id) {
   }
   else {
     Ext.Msg.alert('Add layer','There was an error accessing this layer.');
+  }
+}
+
+function addKmx(id) {
+  if (kmx[id - 1].name == '') {
+    Ext.Msg.alert('Add KML/KMZ','Sorry, this layer does not have a name and cannot be mapped.');
+    return;
+  }
+  var vec = new OpenLayers.Layer.Vector(kmx[id - 1].name,{projection : new OpenLayers.Projection("EPSG:4326")});
+  var bounds = new OpenLayers.Bounds();
+  for (var i = 0; i < kmx[id - 1].features.length; i++) {
+    kmx[id - 1].features[i].geometry.transform(proj4326,map.getProjectionObject());
+    bounds.extend(kmx[id - 1].features[i].geometry.getBounds());
+  }
+  bounds.transform(map.getProjectionObject(),proj4326);
+  if (kmx[id - 1].features.length > 0) {
+    kmx[id - 1].features[0].attributes.bbox    = bounds.toString();
+    kmx[id - 1].features[0].attributes.rootKmx = kmx[id - 1].rootKmx;
+  }
+  vec.addFeatures(kmx[id - 1].features);
+  map.addLayer(vec);
+
+  if (!popupCtl) {
+    popupCtl = new OpenLayers.Control.SelectFeature(vec,{
+      eventListeners : {
+        featurehighlighted : function(e) {
+          var popup = new OpenLayers.Popup.FramedCloud(
+             'Foo'
+            ,e.feature.geometry.getBounds().getCenterLonLat()
+            ,null
+            ,e.feature.attributes.description ? e.feature.attributes.description : 'No details available'
+            ,null
+            ,true
+            ,function() {popupCtl.unselect(e.feature)}
+          );
+          e.feature.popup = popup;
+          map.addPopup(popup);
+        }
+        ,featureunhighlighted : function(e) {
+          map.removePopup(e.feature.popup);
+          e.feature.popup.destroy();
+          e.feature.popup = null; 
+        }
+      }
+    });
+    map.addControl(popupCtl);
+    popupCtl.activate();
+  }
+  else {
+    var layers = [vec];
+    if (popupCtl.layers) {
+      for (var i = 0; i < popupCtl.layers.length; i++) {
+        layers.push(popupCtl.layers[i]);
+      }
+    }
+    else {
+      layers.push(popupCtl.layer);
+    }
+    popupCtl.setLayer(layers);
   }
 }
 
@@ -1302,7 +1423,7 @@ function addDemoLyrs() {
     demoGetCapsLinks[demoLyrs[i].getcaps] = false;
   }
 
-  Ext.getCmp('searchField').setValue('hurricane');
+  Ext.getCmp('searchField').setValue('hurricane tracking');
   Ext.getCmp('searchField').onTrigger2Click();
 }
 
@@ -1325,7 +1446,7 @@ function checkCacheLinksStatus() {
 
     function syncIconsActiveLayers(name,links,u) {
       activeLayersStore.each(function(rec) {
-        if (rec.get(name) == u) {
+        if (rec.get('getInfo') == u) {
           rec.set(name + 'Cached',links[u]);
           rec.commit();
         }
@@ -1363,7 +1484,7 @@ function checkCacheLinksStatus() {
 
   }
 
-  // sync('getCaps',getCapsLinks);  
+  sync('getCaps',getCapsLinks);  
   sync('kmx',kmxLinks);
 }
 
@@ -1526,15 +1647,59 @@ function parseKmxFromCache(u) {
     ,response : 'n/a'
   }));
 
-  new Ext.Window({
-     title       : u
-    ,id          : 'getInfo'
-    ,layout      : 'fit'
-    ,width       : 500
-    ,height      : 250
-    ,autoScroll  : true
-    ,bodyStyle   : 'background:white'
-    ,constrainHeader : true
-    ,html        : "<a target=_blank href='" + '/kmx/find.json' + '?url=' + encodeURIComponent(u) + "'>/kmx/find.json</a>"
-  }).show();
+  var sto = new Ext.data.ArrayStore({
+    fields : ['c','name','description']
+  });
+
+  OpenLayers.Request.issue({
+     method   : 'GET'
+    ,url      : '/kmx/find.json?url=' + encodeURIComponent(u)
+    ,callback : function(r) {
+      kmx = [];
+      var json = new OpenLayers.Format.JSON().read(r.responseText);
+      for (var i = 0; i < json.placemarks.length; i++) {
+        var geojson = new OpenLayers.Format.GeoJSON();
+        kmx.push({
+            name        : json.placemarks[i].geojson.properties.name
+           ,description : json.placemarks[i].geojson.properties.description
+           ,features    : geojson.read(json.placemarks[i].geojson)
+           ,rootKmx     : u
+        });
+        sto.add(new sto.recordType({
+            c           : sto.getCount() + 1
+           ,name        : json.placemarks[i].geojson.properties.name
+           ,description : json.placemarks[i].geojson.properties.description
+        }));
+      }
+
+      if (sto.getCount() == 0) {
+        Ext.Msg.alert('Add KML/KMZ','Sorry, no layers were found.');
+        return;
+      }
+
+      new Ext.Window({
+         title       : u
+        ,id          : 'getInfo'
+        ,layout      : 'fit'
+        ,width       : 500
+        ,height      : 250
+        ,autoScroll  : true
+        ,bodyStyle   : 'background:white'
+        ,constrainHeader : true
+        ,items       : [
+          new Ext.DataView({
+             tpl          :  new Ext.XTemplate(
+               '<tpl for=".">'
+              ,'<div class="search-item">'
+                ,'<table id="cacheResultsHeader"><tr><td>{c}.</td><td><a href="javascript:addKmx({c})"><img src="<%= asset_path 'map_add.png' %>" title="Add layer to map"></a></td><td><a href="javascript:addKmx({c})" title="Add layer to map">{name}</a></td><td><img width=10 src="<%= asset_path 'blank.png' %>"></td><td>{description}</td></table>'
+              ,'</div></tpl>'
+            )
+            ,store        : sto
+            ,itemSelector : 'div.search-item'
+            ,autoScroll   : true
+          })
+        ]
+      }).show();
+    }
+  });
 }
