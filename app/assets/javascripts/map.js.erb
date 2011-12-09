@@ -851,6 +851,28 @@ function initMap() {
     if (e.layer instanceof OpenLayers.Layer.Vector || e.layer.name.indexOf('OpenLayers.Control') == 0) {
       return true;
     }
+
+    // perforam any proj crosswalks
+    e.layer.getFullRequestString = function(newParams, altUrl) {
+      var mapProjection = this.map.getProjectionObject();
+      var projectionCode = this.projection && this.projection.equals(mapProjection) ? this.projection.getCode() : mapProjection.getCode();
+      // 900913 => 3857
+      if (e.layer.options.srsHash && projectionCode.toLowerCase() == 'epsg:900913' && !e.layer.options.srsHash['epsg:900913'] && e.layer.options.srsHash['epsg:3857']) {
+        projectionCode = 'EPSG:3857';
+      }
+      var value = (projectionCode == "none") ? null : projectionCode;
+      if (parseFloat(this.params.VERSION) >= 1.3) {
+        this.params.CRS = value;
+      }  
+      else {
+        this.params.SRS = value;
+      }
+      if (typeof this.params.TRANSPARENT == "boolean") {
+        newParams.TRANSPARENT = this.params.TRANSPARENT ? "TRUE" : "FALSE";
+      }
+      return OpenLayers.Layer.Grid.prototype.getFullRequestString.apply(this, arguments);
+    }
+
     var projOK = (map.getProjection().toLowerCase() == 'epsg:900913' || map.getProjection().toLowerCase() == 'epsg:3857')
         && (String(e.layer.options.projection).toLowerCase() == 'epsg:900913' || String(e.layer.options.projection).toLowerCase() == 'epsg:3857')
     var projAlternates = [];
@@ -860,12 +882,8 @@ function initMap() {
         projAlternates.push(e.layer.options.srs[i].toUpperCase());
       }
     }
-    if (!projOK) {
-      var msg = 'This layer does not appear to support the current base layer\'s projection.  The layer will be added to the map, but it might not be visible.';
-      if ((map.getProjection().toLowerCase() == 'epsg:900913' || map.getProjection().toLowerCase() == 'epsg:3857') && projAlternates.length > 0) {
-        msg += ' The layer appears to support ' + projAlternates.join(' and ') + ' which would work with the current map projection.  Experiment with the projection option by clicking on the settings icon to the left of the layer name in the active layers list.';
-      }
-      Ext.Msg.alert('Add layer warning',msg);
+    if (e.layer.options.srsHash && !e.layer.options.srsHash[map.getProjection().toLowerCase()] && !(map.getProjection().toLowerCase() == 'epsg:900913' && e.layer.options.srsHash['epsg:3857'])) {
+      Ext.Msg.alert('Add layer warning','This layer does not appear to support the current base layer\'s projection.  The layer will be added to the map, but it might not be visible.');
     }
   });
 
@@ -910,7 +928,6 @@ function initMap() {
   });
 
   map.events.register('removelayer',this,function(e) {
-// foo
     if (e.layer.name.indexOf('OpenLayers.Control') == 0) {
       return true;
     }
@@ -1203,7 +1220,7 @@ function showLayerSettings(name) {
       })
       ,displayField   : 'name'
       ,valueField     : 'name'
-      ,value          : lyr.options.singleTile
+      ,value          : lyr.options.singleTile ? lyr.options.singleTile : 'false'
       ,editable       : false
       ,triggerAction  : 'all'
       ,mode           : 'local'
@@ -1670,6 +1687,10 @@ function parseGetCapsFromCache(u) {
           }
           lyr.mergeNewParams({STYLES : lyr.options.styles[0]});
           lyr.options.srs = rec.get('web_mapping_projections') || [];
+          lyr.options.srsHash = {};
+          for (var i = 0; i < lyr.options.srs.length; i++) {
+            lyr.options.srsHash[String(lyr.options.srs[i]).toLowerCase()] = true;
+          }
           lyr.options.llbbox = new OpenLayers.Format.WKT().read(rec.get('bbox')).geometry.getBounds().toBBOX();
           lyr.options.getcaps = rec.get('url');
           map.addLayer(lyr);
